@@ -235,7 +235,7 @@ func (c *IMAPClient) sendClientID() {
 	idData := &imap.IDData{
 		Name:    "Cosmo Mail",
 		Version: "1.0.0",
-		Vendor:  "MagicCode",
+		Vendor:  "Cosmo Mail",
 	}
 	if _, err := c.Client.ID(idData).Wait(); err != nil {
 		// ID 命令失败不阻塞登录（部分服务器可能不支持），仅记录日志

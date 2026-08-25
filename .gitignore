@@ -24,6 +24,8 @@ server/data/
 web/node_modules/
 web/dist/
 web/.vite/
+docs/node_modules/
+docs/.vitepress/dist/
 server/embedfs/dist/
 
 # IDE

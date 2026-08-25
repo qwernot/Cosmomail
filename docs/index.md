@@ -3,83 +3,84 @@ layout: home
 
 hero:
   name: Cosmo Mail
-  text: Cosmo Mail
-  tagline: 基于 IMAP 协议的统一邮件管理平台，一站式收取、管理多个邮箱
+  text: 所有邮箱，一处抵达
+  tagline: 自托管的多邮箱统一收件箱。数据留在自己的服务器上，邮件、附件、通知与自动化集中管理。
+  image:
+    src: /icon.png
+    alt: Cosmo Mail
   actions:
     - theme: brand
-      text: 快速开始
+      text: 立即部署
       link: /guide/getting-started
     - theme: alt
-      text: API 文档
-      link: /api/overview
+      text: 查看功能
+      link: /guide/features
     - theme: alt
       text: GitHub
       link: https://github.com/qwernot/Cosmomail
 
 features:
-  - icon: 🚀
-    title: 一键部署
-    details: 提供一键部署脚本，自动识别平台、下载原生二进制、注册系统服务和全局 cosmomail 命令。
-  - icon: 📥
-    title: IMAP 代收
-    details: 通过 IMAP 协议代理收取多个邮箱账号的邮件，支持 TLS 连接、全量/增量同步，自动去重存储到本地数据库。
+  - icon: 🌌
+    title: 多邮箱归一
+    details: 在一个界面管理 QQ、Outlook、Gmail、163、企业邮箱及其他标准 IMAP/POP3 邮箱。
   - icon: ⚡
-    title: 实时推送
-    details: 后台常驻 IMAP IDLE 监听，新邮件到达即时推送到 PWA 客户端和 Webhook 外部服务。
+    title: 增量收信
+    details: 使用 UID 游标只获取新增邮件；支持 IMAP IDLE，并以可靠轮询补偿服务商漏发通知。
+  - icon: 🪐
+    title: 单文件运行
+    details: 前端与后端打包为一个原生可执行文件，SQLite 本地存储，不依赖 Docker 或 NAS 套件。
+  - icon: 🔐
+    title: 数据自主
+    details: 邮件、附件和凭据保存在自己的设备；凭据加密存储，支持代理与 Outlook OAuth2。
+  - icon: 🛰️
+    title: 通知与自动化
+    details: 提供 SSE、Web Push 和可自定义的 Webhook，把新邮件接入企业微信或自动化工作流。
   - icon: 📱
-    title: PWA 客户端
-    details: 现代化渐进式 Web 应用，支持安装到桌面/主屏幕、深色模式、完全响应式布局。
-  - icon: 🔒
-    title: 安全可靠
-    details: JWT 认证鉴权、AES 加密密码存储、CORS 跨域保护，安全密钥支持环境变量传入或首次启动自动生成。
-  - icon: 🔌
-    title: Webhook 通知
-    details: 新邮件到达时自动推送通知到外部服务，支持自定义 Header/Body，适用于自动化工作流集成。
-  - icon: 🛠️
-    title: CLI 管理
-    details: 安装后提供 cosmomail 全局命令，支持 status/start/stop/restart/update/logs/doctor/uninstall 等子命令。
-  - icon: 📦
-    title: 单二进制部署
-    details: 前端产物嵌入 Go 二进制，纯 Go SQLite 驱动无需 CGO，支持交叉编译至 Linux/macOS/Windows。
+    title: 全端 PWA
+    details: 响应式界面适配桌面和手机，可安装到主屏幕，并支持深色主题。
 ---
 
-## 技术栈
+## 三步开始
 
-| 层级 | 技术 |
-|------|------|
-| 后端 | Go 1.21+, Fiber v2, GORM, modernc.org/sqlite, go-imap/v2 |
-| 前端 | Vue 3 Composition API, Vite 5, Pinia, Vue Router |
-| PWA | vite-plugin-pwa, Service Worker (Workbox) |
-| 样式 | 原生 CSS + CSS 变量主题系统 |
-
-## 快速体验
-
-:::: code-group
-
-```bash [一键部署（GitHub）]
-curl -fsSL https://raw.githubusercontent.com/qwernot/Cosmomail/main/deploy.sh -o cosmomail.sh
-chmod +x cosmomail.sh && sudo ./cosmomail.sh install
-```
-
-```bash [一键部署（jsDelivr 国内加速）]
-curl -fsSL https://cdn.jsdelivr.net/gh/qwernot/Cosmomail@main/deploy.sh -o cosmomail.sh
-chmod +x cosmomail.sh && sudo ./cosmomail.sh install
-```
-
-```bash [源码构建]
-./build.sh
-```
-
-```bash [开发模式]
-./dev.sh start
-```
-
-::::
-
-服务启动后访问 **http://localhost:8080** 即可使用。安装后可通过 `cosmomail` 命令管理服务：
+### 1. 下载部署脚本
 
 ```bash
-cosmomail status     # 查看状态
-cosmomail doctor     # 环境自检
-cosmomail update     # 一键更新
+curl -fsSL https://raw.githubusercontent.com/qwernot/Cosmomail/main/deploy.sh -o cosmomail.sh
+chmod +x cosmomail.sh
 ```
+
+### 2. 安装并启动
+
+```bash
+sudo ./cosmomail.sh install
+```
+
+### 3. 打开管理界面
+
+访问 `http://服务器地址:8080`，创建管理员账号，然后添加你的邮箱。
+
+::: tip 正式使用
+建议绑定域名并配置 HTTPS 后，再录入正式邮箱凭据。
+:::
+
+## 日常管理
+
+```bash
+cosmomail status      # 查看运行状态
+cosmomail logs        # 查看实时日志
+cosmomail restart     # 重启服务
+cosmomail update      # 更新到最新版
+cosmomail doctor      # 环境健康检查
+```
+
+## 技术架构
+
+| 层级 | 技术 |
+|---|---|
+| 后端 | Go、Fiber、GORM、SQLite、go-imap/v2 |
+| 前端 | Vue 3、Vite、Pinia、Vue Router |
+| 客户端 | PWA、Service Worker、响应式 Web UI |
+| 通知 | SSE、Web Push、Webhook |
+| 部署 | Linux systemd、macOS、Windows 原生二进制 |
+
+全部源代码、版本发布和问题跟踪都在 [Cosmo Mail GitHub 仓库](https://github.com/qwernot/Cosmomail)。

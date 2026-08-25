@@ -9,16 +9,17 @@ import { defineConfig } from 'vitepress'
  *   缺少前导 / → 自动补全（如 cosmomail → /cosmomail）
  *   尾部有多余 / → 自动去除（如 /cosmomail/ → /cosmomail）
  */
-let rawBase = process.env.VITEPRESS_BASE || '/'
-console.log(`[VITEPRESS_BASE] ${rawBase}`)
-const base = rawBase.replace(/\/+$/, '').replace(/^([^/])/, '/$1')
-console.log(`[base] ${base}`)
+const rawBase = process.env.VITEPRESS_BASE || '/'
+const normalizedBase = rawBase.trim().replace(/^([^/])/, '/$1')
+const base = normalizedBase === '/' ? '/' : `${normalizedBase.replace(/\/+$/, '')}/`
 
 export default defineConfig({
   title: 'Cosmo Mail',
   description: 'Cosmo Mail - 快速、私有的统一邮件管理平台',
   lang: 'zh-CN',
   base,
+  cleanUrls: true,
+  lastUpdated: true,
   vite: {
     server: {
       host: '0.0.0.0',
@@ -31,23 +32,27 @@ export default defineConfig({
   ignoreDeadLinks: [/localhost:\d+/, /\d+\.\d+\.\d+\.\d+/],
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}/logo.svg` }],
-    ['meta', { name: 'theme-color', content: '#646cff' }],
+    ['link', { rel: 'icon', type: 'image/png', href: `${base}icon.png` }],
+    ['meta', { name: 'theme-color', content: '#8b5cf6' }],
+    ['meta', { property: 'og:title', content: 'Cosmo Mail' }],
+    ['meta', { property: 'og:description', content: '快速、私有的多邮箱统一管理平台' }],
   ],
 
   themeConfig: {
-    logo: `${base}/logo.svg`,
+    logo: `${base}icon.png`,
+    siteTitle: 'Cosmo Mail',
 
     nav: [
       { text: '指南', link: '/guide/getting-started' },
       { text: 'API', link: '/api/overview' },
+      { text: '下载', link: 'https://github.com/qwernot/Cosmomail/releases/latest' },
       {
         text: '更多',
         items: [
           { text: '开发指南', link: '/dev/overview' },
           { text: '配置参考', link: '/config/environment' },
           { text: 'GitHub', link: 'https://github.com/qwernot/Cosmomail' },
-          { text: '项目主页', link: 'https://github.com/qwernot/Cosmomail' },
+          { text: '更新日志', link: '/guide/changelog' },
         ],
       },
     ],
@@ -85,7 +90,10 @@ export default defineConfig({
         { text: '认证接口', link: '/api/auth' },
         { text: '邮箱管理', link: '/api/accounts' },
         { text: '邮件管理', link: '/api/mails' },
+        { text: '草稿接口', link: '/api/drafts' },
         { text: '附件接口', link: '/api/attachments' },
+        { text: 'SSE 实时事件', link: '/api/sse' },
+        { text: '推送接口', link: '/api/push' },
         { text: 'Webhook 接口', link: '/api/webhooks' },
       ],
       '/dev/': [
@@ -104,6 +112,11 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/qwernot/Cosmomail' },
     ],
+
+    editLink: {
+      pattern: 'https://github.com/qwernot/Cosmomail/edit/main/docs/:path',
+      text: '在 GitHub 上编辑此页',
+    },
 
     footer: {
       message: '基于 AGPLv3 协议开源',

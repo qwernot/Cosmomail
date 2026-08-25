@@ -21,7 +21,7 @@ cosmomail update
 
 ## 手动安装
 
-从 Release 下载对应平台的 `cosmomail-*` 文件，重命名为 `cosmomail` 后赋予执行权限：
+从 Release 下载对应平台的文件（Linux x86_64 为 `cosmomail`，ARM 为 `cosmomail-arm` 或 `cosmomail-arm64`），赋予执行权限：
 
 ```bash
 chmod +x cosmomail
@@ -34,12 +34,12 @@ systemd 示例位于 `server/cosmomail.service`。
 
 ## Windows
 
-下载 `cosmomail-windows-amd64.exe`，在 PowerShell 中运行：
+下载 `cosmomail.exe`，在 PowerShell 中运行：
 
 ```powershell
 $env:COSMOMAIL_ENV = "production"
 $env:COSMOMAIL_DSN = "data/cosmomail.db"
-.\cosmomail-windows-amd64.exe
+.\cosmomail.exe
 ```
 
 ## 配置

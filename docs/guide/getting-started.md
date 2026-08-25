@@ -8,7 +8,7 @@ Linux 或 macOS：
 curl -fsSL https://raw.githubusercontent.com/qwernot/Cosmomail/main/deploy.sh | sudo bash
 ```
 
-Windows 请下载 Release 中的 `cosmomail-windows-amd64.exe` 直接运行。
+Windows 请下载 Release 中的 `cosmomail.exe` 直接运行。
 
 ## 2. 打开界面
 
