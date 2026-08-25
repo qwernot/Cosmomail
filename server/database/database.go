@@ -66,6 +66,11 @@ func Init(dsn string) *gorm.DB {
 		log.Fatalf("❌ 数据库迁移失败: %v", err)
 	}
 
+	// 单用户模式必须由数据库兜底；仅在服务层先 Count 会受到并发注册竞态影响。
+	if err := db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_single_admin ON users ((1))").Error; err != nil {
+		log.Printf("⚠️  无法建立单管理员约束（请检查是否已有多个用户）: %v", err)
+	}
+
 	// 迁移后清理：修复历史重复入库问题
 	// 1. 删除 account_id+folder+message_uid 维度的重复记录（保留最早入库的一条）
 	// 2. 将旧的带时间戳的 fallback message_id 更新为稳定格式

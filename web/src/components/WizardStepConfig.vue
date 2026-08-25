@@ -138,7 +138,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import WizardOAuth2Flow from './WizardOAuth2Flow.vue'
 import { getProviderByKey } from '@/data/providers.js'
 

@@ -11,13 +11,13 @@ import (
 	"log"
 	"mime"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"cosmomail/config"
 	"cosmomail/models"
+	"cosmomail/storage"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/encoding/unicode"
@@ -244,13 +244,12 @@ func (s *AttachmentService) StreamFromIMAP(client *imapclient.Client, imapUID ui
 // CacheAttachment 将从 IMAP 获取的附件内容缓存到本地
 // 用于用户首次下载后异步缓存（可选优化）
 func (s *AttachmentService) CacheAttachment(att *models.Attachment, content io.Reader) error {
-	baseDir := filepath.Join(".", "data", "attachments")
+	baseDir := storage.AttachmentDir
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
 		return fmt.Errorf("创建附件目录失败: %w", err)
 	}
 
-	fileName := fmt.Sprintf("%d_%s", att.MailID, att.Filename)
-	filePath := filepath.Join(baseDir, fileName)
+	filePath := storage.AttachmentPath(att.MailID, strconv.FormatUint(uint64(att.ID), 10), att.Filename)
 
 	outFile, err := os.Create(filePath)
 	if err != nil {
@@ -297,6 +296,15 @@ func (s *AttachmentService) CleanupExpiredCache() (int64, error) {
 	cleaned := int64(0)
 	for _, att := range expiredAtt {
 		if att.FilePath != "" {
+			if !storage.IsAttachmentPath(att.FilePath) {
+				log.Printf("⚠️  拒绝删除附件目录外的异常路径: ID=%d", att.ID)
+				s.db.Model(&att).Updates(map[string]interface{}{
+					"is_cached":   false,
+					"file_path":   "",
+					"cache_expire": nil,
+				})
+				continue
+			}
 			if err := os.Remove(att.FilePath); err == nil || os.IsNotExist(err) {
 				cleaned++
 				s.db.Model(&att).Updates(map[string]interface{}{

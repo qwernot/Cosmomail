@@ -387,6 +387,7 @@ import { useToast } from '@/composables/useToast'
 import { useUpdateCheck } from '@/composables/useUpdateCheck'
 import { useWebPush } from '@/composables/useWebPush'
 import * as webhookApi from '@/api/webhook'
+import { sendTest as sendTestPush } from '@/api/push'
 
 const toast = useToast()
 const appStore = useAppStore()
@@ -778,8 +779,7 @@ async function toggleNotification() {
 
     // 发送测试推送验证通道
     try {
-      const { sendTest } = await import('@/api/push')
-      await sendTest()
+      await sendTestPush()
     } catch (_) {}
   }
 }

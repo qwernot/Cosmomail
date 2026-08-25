@@ -2,12 +2,12 @@
 # 用法: make build / make run / make install
 
 APP_NAME := cosmomail
-VERSION := 1.0.0
+VERSION := 1.1.5
 BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "dev")
 
 # Go 参数
-LDFLAGS := -ldflags "-s -w -X main.Version=$(VERSION) -X main.BuildTime=$(BUILD_TIME) -X main.GitCommit=$(GIT_COMMIT)"
+LDFLAGS := -ldflags "-s -w -X cosmomail/buildinfo.Version=$(VERSION) -X cosmomail/buildinfo.BuildTime=$(BUILD_TIME) -X cosmomail/buildinfo.GitCommit=$(GIT_COMMIT)"
 
 .PHONY: all build run clean install uninstall help
 

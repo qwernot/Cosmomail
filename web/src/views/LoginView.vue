@@ -272,7 +272,7 @@ async function handleRegister() {
   else if (regForm.username.length > 32) { errors.username = '用户名不超过 32 位'; hasError = true }
 
   if (!regForm.password) { errors.password = '请输入密码'; hasError = true }
-  else if (regForm.password.length < 6) { errors.password = '密码至少 6 位'; hasError = true }
+  else if (regForm.password.length < 8) { errors.password = '密码至少 8 位'; hasError = true }
 
   if (!regForm.confirmPassword) { errors.confirmPwd = '请确认密码'; hasError = true }
   else if (regForm.password !== regForm.confirmPassword) { errors.confirmPwd = '两次密码不一致'; hasError = true }

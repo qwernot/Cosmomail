@@ -26,8 +26,9 @@ func AuthRequired(authService *services.AuthService) fiber.Handler {
 			}
 		}
 
-		// ⭐ fallback: 从 query string 获取（用于 SSE 流、文件下载等浏览器直接请求）
-		if tokenStr == "" {
+		// EventSource 无法设置 Authorization header，因此仅 SSE 端点允许查询参数认证。
+		// 其他受保护接口禁止 URL Token，避免凭据进入浏览器历史、代理日志和 Referer。
+		if tokenStr == "" && c.Path() == "/api/v1/mails/stream" {
 			tokenStr = c.Query("token")
 		}
 

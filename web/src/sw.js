@@ -3,7 +3,7 @@
 
 import { precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
-import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies'
+import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
 // --- 预缓存声明（由 vite-plugin-pwa injectManifest 注入） ---
@@ -71,18 +71,13 @@ self.addEventListener('notificationclick', (event) => {
   )
 })
 
-// --- 运行时缓存策略 ---
+// 删除旧版本创建的 API 缓存。邮件、账号和设置属于私密且强时效数据，
+// 不应进入 CacheStorage，也不能由 stale-while-revalidate 返回旧结果。
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.delete('api-cache'))
+})
 
-// API 缓存（排除 SSE 流）
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/api') && !url.pathname.includes('/mails/stream'),
-  new StaleWhileRevalidate({
-    cacheName: 'api-cache',
-    plugins: [
-      new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 5 * 60 }),
-    ],
-  })
-)
+// --- 运行时缓存策略 ---
 
 // 图片缓存
 registerRoute(

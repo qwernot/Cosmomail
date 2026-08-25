@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { Mail, Send, Globe, ChevronLeft } from 'lucide-vue-next'
+import { Mail, Send, Globe, ChevronLeft } from '@lucide/vue'
 
 const props = defineProps({
   formData: { type: Object, required: true }

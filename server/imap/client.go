@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"cosmomail/config"
+	"cosmomail/buildinfo"
 	"cosmomail/models"
 	"cosmomail/oauth2"
 	pop3pkg "cosmomail/pop3"
@@ -234,7 +235,7 @@ func (c *IMAPClient) authenticateLogin() error {
 func (c *IMAPClient) sendClientID() {
 	idData := &imap.IDData{
 		Name:    "Cosmo Mail",
-		Version: "1.0.0",
+		Version: buildinfo.Version,
 		Vendor:  "Cosmo Mail",
 	}
 	if _, err := c.Client.ID(idData).Wait(); err != nil {

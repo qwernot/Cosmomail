@@ -112,7 +112,15 @@ func (s *AuthService) Register(req models.RegisterRequest) error {
 		Username:     req.Username,
 		PasswordHash: hashedPassword,
 	}
-	return s.db.Create(user).Error
+	if err := s.db.Create(user).Error; err != nil {
+		// 数据库的单用户唯一索引负责关闭并发首次注册竞态。
+		s.db.Model(&models.User{}).Count(&count)
+		if count > 0 {
+			return ErrUserExists
+		}
+		return err
+	}
+	return nil
 }
 
 // GetAuthStatus 查询是否已设置管理员（前端据此决定显示登录还是注册页）

@@ -193,7 +193,7 @@ func doDispatch(h *hookInfo, payload Payload, event string) *dispatchResult {
 	defer resp.Body.Close()
 
 	result.StatusCode = resp.StatusCode
-	respBody, _ := io.ReadAll(resp.Body)
+	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
 	result.Response = string(respBody)
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {

@@ -45,7 +45,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Settings } from 'lucide-vue-next'
+import { Settings } from '@lucide/vue'
 import { providers as allProviders } from '@/data/providers.js'
 
 const props = defineProps({

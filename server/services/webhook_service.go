@@ -216,7 +216,8 @@ func (s *WebhookService) dispatch(hook *models.Webhook, payload models.WebhookPa
 
 	result.StatusCode = resp.StatusCode
 
-	respBody, _ := io.ReadAll(resp.Body)
+	// 限制第三方响应体，避免异常 Webhook 将内存和日志数据库撑满。
+	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
 	result.Response = string(respBody)
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {

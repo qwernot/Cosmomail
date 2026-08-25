@@ -7,7 +7,9 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 	"cosmomail/config"
 	"cosmomail/crypto"
@@ -96,15 +98,33 @@ func main() {
 	// 注册 API 路由
 	routes.Register(app, db)
 
-	// 启动 IMAP 后台 Worker（所有活跃账号）
-	go imap.StartWorkers(db, cfg)
-
 	// 初始化 SSE 实时推送服务
 	sse.InitBroker()
 
-	// 启动 HTTP 服务
+	// 启动 IMAP 后台 Worker（所有活跃账号）
+	go imap.StartWorkers(db, cfg)
+
+	// 启动 HTTP 服务，并在系统停止时优雅关闭连接和同步 Worker。
 	log.Printf("🚀 Cosmo Mail 服务启动于 http://localhost:%d", cfg.Server.Port)
-	if err := app.Listen(cfg.Server.Addr()); err != nil {
-		log.Fatalf("❌ 服务启动失败: %v", err)
+	serverErr := make(chan error, 1)
+	go func() {
+		serverErr <- app.Listen(cfg.Server.Addr())
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(stop)
+
+	select {
+	case sig := <-stop:
+		log.Printf("🛑 收到停止信号 %s，正在安全退出", sig)
+		if err := app.Shutdown(); err != nil {
+			log.Printf("⚠️  HTTP 服务关闭异常: %v", err)
+		}
+		imap.StopWorkers()
+	case err := <-serverErr:
+		if err != nil {
+			log.Fatalf("❌ 服务启动失败: %v", err)
+		}
 	}
 }

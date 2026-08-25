@@ -6,6 +6,8 @@ package handlers
 import (
 	"cosmomail/models"
 	"cosmomail/services"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,8 +28,12 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "请求参数无效: " + err.Error()})
 	}
+	req.Username = strings.TrimSpace(req.Username)
 	if req.Username == "" || req.Password == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "用户名和密码不能为空"})
+	}
+	if len(req.Password) > 72 {
+		return c.Status(400).JSON(fiber.Map{"error": "密码不能超过 72 字节"})
 	}
 
 	result, err := h.service.Login(req)
@@ -47,11 +53,16 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": "请求参数无效: " + err.Error()})
 	}
+	req.Username = strings.TrimSpace(req.Username)
 	if req.Username == "" || req.Password == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "用户名和密码不能为空"})
 	}
-	if len(req.Password) < 6 {
-		return c.Status(400).JSON(fiber.Map{"error": "密码长度至少 6 位"})
+	usernameLength := utf8.RuneCountInString(req.Username)
+	if usernameLength < 3 || usernameLength > 32 {
+		return c.Status(400).JSON(fiber.Map{"error": "用户名长度应为 3–32 个字符"})
+	}
+	if len(req.Password) < 8 || len(req.Password) > 72 {
+		return c.Status(400).JSON(fiber.Map{"error": "密码长度应为 8–72 字节"})
 	}
 
 	err := h.service.Register(req)

@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"cosmomail/config"
+	"cosmomail/buildinfo"
 	"cosmomail/embedfs"
 	"cosmomail/handlers"
 	"cosmomail/middleware"
@@ -73,8 +74,9 @@ func Register(app *fiber.App, db *gorm.DB) {
 	//  公开接口：无需认证
 	// ============================================================
 	authGroup := api.Group("/auth")
-	authGroup.Post("/login", authHandler.Login)
-	authGroup.Post("/register", authHandler.Register)
+	authRateLimit := middleware.AuthRateLimit()
+	authGroup.Post("/login", authRateLimit, authHandler.Login)
+	authGroup.Post("/register", authRateLimit, authHandler.Register)
 	authGroup.Get("/status", authHandler.Status)
 
 	// ============================================================
@@ -172,7 +174,7 @@ func Register(app *fiber.App, db *gorm.DB) {
 		return c.JSON(fiber.Map{
 			"status":  "ok",
 			"service": "cosmomail",
-			"version": "1.0.0",
+			"version": buildinfo.Version,
 		})
 	})
 

@@ -48,7 +48,10 @@ func (p *WorkerPool) TriggerSync(accountID uint) bool {
 	return true
 }
 
-var globalPool *WorkerPool
+var (
+	globalPool   *WorkerPool
+	globalPoolMu sync.RWMutex
+)
 
 // idleVerifiedServers 已确认支持 IMAP IDLE 的服务器白名单
 // 只有经过验证的服务器才会尝试IDLE，未知服务器首次会尝试并记录结果
@@ -74,6 +77,8 @@ var (
 // GlobalPool exposes the worker pool for external packages (services/handlers)
 // Returns nil if workers haven't been started yet
 func GlobalPool() *WorkerPool {
+	globalPoolMu.RLock()
+	defer globalPoolMu.RUnlock()
 	return globalPool
 }
 
@@ -86,7 +91,9 @@ func StartWorkers(db *gorm.DB, cfg *config.Config) {
 		shutdownCh: make(chan struct{}),
 		sem:        make(chan struct{}, cfg.IMAP.MaxConcurrent),
 	}
+	globalPoolMu.Lock()
 	globalPool = pool
+	globalPoolMu.Unlock()
 
 	// 查询所有活跃的邮箱账号
 	var accounts []models.MailAccount
@@ -109,19 +116,20 @@ func StartWorkers(db *gorm.DB, cfg *config.Config) {
 
 // StopWorkers 优雅关闭所有 Worker
 func StopWorkers() {
-	if globalPool == nil {
+	pool := GlobalPool()
+	if pool == nil {
 		return
 	}
-	atomic.StoreInt32(&globalPool.shutdown, 1)
-	close(globalPool.shutdownCh)
+	atomic.StoreInt32(&pool.shutdown, 1)
+	close(pool.shutdownCh)
 
-	globalPool.mu.RLock()
-	for _, w := range globalPool.workers {
+	pool.mu.RLock()
+	for _, w := range pool.workers {
 		w.Stop()
 	}
-	globalPool.mu.RUnlock()
+	pool.mu.RUnlock()
 
-	globalPool.wg.Wait()
+	pool.wg.Wait()
 	log.Println("🛑 所有 IMAP Worker 已停止")
 }
 

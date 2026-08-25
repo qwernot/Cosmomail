@@ -29,7 +29,7 @@ type LoginRequest struct {
 // RegisterRequest 注册请求（仅首次初始化时可用）
 type RegisterRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=32"`
-	Password string `json:"password" validate:"required,min=6,max=64"`
+	Password string `json:"password" validate:"required,min=8,max=72"`
 }
 
 // ---- 响应 DTO ----

@@ -113,7 +113,6 @@
 
 <script setup>
 import { reactive } from 'vue'
-import { getAttachmentDownloadUrl, downloadAttachment } from '@/api/attachment'
 
 const props = defineProps({
   attachments: {
@@ -141,56 +140,10 @@ function initOrResetState(att) {
   }
 }
 
-// 大文件阈值: 10MB
-const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024
-
 async function handleDownload(att) {
   // 防止重复点击
   if (getState(att.id).downloading) return
-
-  // 智能选择: 小文件用 fetch+blob(带进度), 大文件用 a 标签直链(省内存)
-  if (att.size && att.size >= LARGE_FILE_THRESHOLD) {
-    return downloadDirectly(att)
-  }
-
   return downloadWithProgress(att)
-}
-
-/**
- * 大文件直连下载（不经过 JS 内存，浏览器原生处理）
- */
-function downloadDirectly(att) {
-  // 显示"正在下载"提示状态
-  downloadStates[att.id] = {
-    downloading: true,
-    progress: -1, // 不确定模式(无进度)
-    loaded: 0,
-    total: att.size || 0,
-    error: false,
-    errorMsg: '',
-    completed: false
-  }
-
-  try {
-    // 使用 a 标签触发浏览器原生下载
-    const url = getAttachmentDownloadUrl(att.id)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = att.filename || 'attachment'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-
-    // 短暂显示"已触发下载"状态后清除
-    setTimeout(() => {
-      delete downloadStates[att.id]
-    }, 2000)
-  } catch (err) {
-    downloadStates[att.id].downloading = false
-    downloadStates[att.id].error = true
-    downloadStates[att.id].errorMsg = '下载失败'
-    console.error(`[附件下载] ${att.filename} 下载失败:`, err)
-  }
 }
 
 /**

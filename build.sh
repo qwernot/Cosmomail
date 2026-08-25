@@ -138,7 +138,9 @@ build_single_platform() {
     # 每次编译前重新嵌入（防止上次清理）
     embed_frontend
 
-    local ldflags="-s -w -X main.version=$(date +%Y%m%d-%H%M) -X main.isProduction=true"
+    local app_version
+    app_version="$(node -p "require('${SCRIPT_DIR}/version.json').latest.replace(/^v/, '')")"
+    local ldflags="-s -w -X cosmomail/buildinfo.Version=${app_version} -X main.isProduction=true"
 
     # 确定输出文件名
     local output="${OUTPUT_DIR}/${BINARY_NAME}-${target_os}-${target_arch}"
@@ -229,7 +231,9 @@ cmd_build_single() {
 
     embed_frontend
 
-    local ldflags="-s -w -X main.version=$(date +%Y%m%d-%H%M) -X main.isProduction=true"
+    local app_version
+    app_version="$(node -p "require('${SCRIPT_DIR}/version.json').latest.replace(/^v/, '')")"
+    local ldflags="-s -w -X cosmomail/buildinfo.Version=${app_version} -X main.isProduction=true"
 
     if [ -n "${target_os}" ]; then
         export GOOS="${target_os}"

@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, computed, onUnmounted, watch } from 'vue'
-import { Lock, Zap, Copy, CheckCircle, AlertCircle, ExternalLink } from 'lucide-vue-next'
+import { Lock, Zap, Copy, CheckCircle, AlertCircle, ExternalLink } from '@lucide/vue'
 import { requestDeviceCode, pollToken } from '@/api/account'
 import { useToast } from '@/composables/useToast'
 

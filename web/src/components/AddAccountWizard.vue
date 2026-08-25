@@ -52,7 +52,7 @@
 
 <script setup>
 import { ref, reactive, computed, defineAsyncComponent } from 'vue'
-import { X, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { X, ChevronLeft, ChevronRight } from '@lucide/vue'
 import { createAccount } from '@/api/account'
 import { useToast } from '@/composables/useToast'
 import WizardStepProvider from './WizardStepProvider.vue'

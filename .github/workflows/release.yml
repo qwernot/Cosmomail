@@ -60,7 +60,9 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           GOARM: ${{ matrix.goarm || '7' }}
           CGO_ENABLED: 0
-        run: go build -ldflags="-s -w -X main.isProduction=true" -o "../dist/cosmomail${{ matrix.suffix }}" .
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          go build -ldflags="-s -w -X cosmomail/buildinfo.Version=${VERSION} -X main.isProduction=true" -o "../dist/cosmomail${{ matrix.suffix }}" .
       - uses: actions/upload-artifact@v5
         with:
           name: cosmomail-${{ matrix.goos }}-${{ matrix.goarch }}

@@ -11,6 +11,7 @@ import (
 	"cosmomail/imap"
 	"cosmomail/models"
 	"cosmomail/services"
+	"cosmomail/storage"
 	"net/url"
 	"strconv"
 	"strings"
@@ -64,11 +65,16 @@ func (h *AttachmentHandler) Download(c *fiber.Ctx) error {
 	// ========== 模式1：已缓存 → 直接返回 ==========
 	if att.IsCached {
 		c.Set("Content-Type", att.ContentType)
-		c.Set("Content-Disposition", `attachment; filename="`+att.Filename+`"`)
+		safeFilename := sanitizeFilename(att.Filename)
+		c.Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"; filename*=UTF-8''%s`,
+			safeFilename, url.PathEscape(att.Filename)))
 		c.Set("Content-Length", strconv.FormatInt(att.Size, 10))
 
 		if att.IsFileBased() {
-			return c.SendFile(att.FilePath)
+			if storage.IsAttachmentPath(att.FilePath) {
+				return c.SendFile(att.FilePath)
+			}
+			log.Printf("⚠️  拒绝读取附件目录外的异常路径 (ID=%d)", att.ID)
 		}
 		if len(att.Content) > 0 {
 			return c.Send(att.Content)

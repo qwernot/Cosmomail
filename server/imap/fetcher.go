@@ -10,12 +10,12 @@ import (
 	"log"
 	"mime"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"cosmomail/config"
 	"cosmomail/models"
+	"cosmomail/storage"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/encoding/unicode"
@@ -142,6 +142,7 @@ func (f *Fetcher) syncMailbox(client *IMAPClient, mailboxName, folder string) (i
 	newCount := 0
 	processed := 0
 	maxSeenUID := state.LastUID
+	stoppedOnError := false
 	syncMode := client.Account.SyncMode
 	syncDays := client.Account.SyncDays
 	if syncDays <= 0 {
@@ -162,26 +163,29 @@ func (f *Fetcher) syncMailbox(client *IMAPClient, mailboxName, folder string) (i
 		buf, err := msg.Collect()
 		if err != nil {
 			log.Printf("⚠️  收集消息数据失败: %v", err)
-			continue
+			stoppedOnError = true
+			break
 		}
 		processed++
-		if uint32(buf.UID) > maxSeenUID {
-			maxSeenUID = uint32(buf.UID)
-		}
 
 		// 根据 SyncMode 判断是否需要同步这封邮件
 		if !shouldSync(buf, syncMode, cutoffTime) {
+			maxSeenUID = uint32(buf.UID)
 			continue
 		}
 
 		parsed, _, err := f.parseMessage(client, buf)
 		if err != nil {
 			log.Printf("⚠️  解析邮件失败 (UID=%d): %v", buf.UID, err)
-			continue
+			// 不推进到失败 UID，下一轮会重新尝试，避免永久漏信。
+			stoppedOnError = true
+			break
 		}
 		if parsed == nil {
+			maxSeenUID = uint32(buf.UID)
 			continue // 已存在（去重跳过）
 		}
+		maxSeenUID = uint32(buf.UID)
 
 		// ⭐ 记录本次成功入库的邮件ID（用于精确触发 webhook）
 		f.SyncedMailIDs = append(f.SyncedMailIDs, parsed.ID)
@@ -199,6 +203,9 @@ func (f *Fetcher) syncMailbox(client *IMAPClient, mailboxName, folder string) (i
 	}
 	if err := f.saveSyncState(client.Account.ID, folder, mbox.UIDValidity, maxSeenUID); err != nil {
 		return newCount, err
+	}
+	if stoppedOnError {
+		log.Printf("⚠️  [%s] 同步在 UID %d 后暂停，下一轮将重试失败邮件", folder, maxSeenUID)
 	}
 
 	log.Printf("📬 同步完成 %s (模式=%s): 新增/更新 %d 封邮件, IDs=%v", client.Account.Email, syncMode, newCount, f.SyncedMailIDs)
@@ -344,7 +351,7 @@ func (f *Fetcher) parseMessage(client *IMAPClient, buf *imapclient.FetchMessageB
 			log.Printf("⚠️  保存附件记录失败 (mail_id=%d, file=%s): %v",
 				mailObj.ID, att.Filename, attErr)
 			// 清理可能已创建的文件
-			if att.FilePath != "" {
+			if att.FilePath != "" && storage.IsAttachmentPath(att.FilePath) {
 				os.Remove(att.FilePath)
 			}
 		}
@@ -428,7 +435,7 @@ func (f *Fetcher) fetchBody(client *IMAPClient, uid imap.UID, mailID uint) (*Bod
 	// 准备附件存储目录（仅当 mailID 可用时）
 	var baseDir string
 	if mailID > 0 {
-		baseDir = filepath.Join(".", "data", "attachments")
+		baseDir = storage.AttachmentDir
 		if err := os.MkdirAll(baseDir, 0755); err != nil {
 			log.Printf("⚠️  创建附件目录失败: %v", err)
 			baseDir = ""
@@ -574,8 +581,7 @@ func (f *Fetcher) parseEntity(entity *message.Entity, result *BodyResult, mailID
 
 		if shouldStream && mailID > 0 && baseDir != "" {
 			// 流式写入磁盘 - 完全不占用内存存储完整内容
-			fileName := fmt.Sprintf("%d_%s", mailID, decodedFilename)
-			filePath := filepath.Join(baseDir, fileName)
+			filePath := storage.AttachmentPath(mailID, partID, decodedFilename)
 
 			if outFile, err := os.Create(filePath); err == nil {
 				written, copyErr := io.Copy(outFile, entity.Body)
