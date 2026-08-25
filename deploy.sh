@@ -289,6 +289,7 @@ _download_attempt() {
 
     if command -v curl &>/dev/null; then
         curl -fSL --connect-timeout "${timeout}" --max-time 300 \
+            --speed-limit 1024 --speed-time 15 \
             --progress-bar -o "${dest}" "${url}" 2>/dev/null && return 0
     elif command -v wget &>/dev/null; then
         wget --timeout="${timeout}" --progress=bar:force:noscroll \
@@ -574,22 +575,34 @@ install_binary() {
     local binary_url="${REPO_URL}/releases/download/${version}/${BIN_NAME}${suffix}"
 
     local binary_path="${INSTALL_DIR}/${BIN_NAME}${suffix}"
+    local staged_path="${binary_path}.download.$$"
+    local final_bin="${INSTALL_DIR}/${BIN_NAME}"
+    local backup_path="${final_bin}.bak.$(date +%Y%m%d%H%M%S)"
 
     info "正在下载 Cosmo Mail ${version} (${target_os}/${target_arch})..."
     info "下载地址: ${binary_url}"
 
-    download_file "${binary_url}" "${binary_path}"
-
-    chmod +x "${binary_path}"
-
-    # 备份旧版本
-    local final_bin="${INSTALL_DIR}/${BIN_NAME}"
-    if [ -f "${final_bin}" ] && [ "${final_bin}" != "${binary_path}" ]; then
-        mv "${final_bin}" "${final_bin}.bak.$(date +%Y%m%d%H%M%S)" 2>/dev/null || true
+    # 始终下载到同目录临时文件。中断或下载失败时不会截断正在运行的程序，
+    # 完成后通过同一文件系统内的 mv 原子替换。
+    if ! download_file "${binary_url}" "${staged_path}"; then
+        rm -f "${staged_path}"
+        return 1
     fi
+    if [ ! -s "${staged_path}" ]; then
+        rm -f "${staged_path}"
+        die "下载文件为空，已保留当前版本"
+    fi
+    chmod +x "${staged_path}"
 
-    # 统一入口处理
-    if [ "${suffix}" != "" ]; then
+    # 备份旧版本后再原子替换，确保随时可回滚。
+    if [ -f "${final_bin}" ] && [ ! -L "${final_bin}" ]; then
+        cp -p "${final_bin}" "${backup_path}"
+        info "旧版本已备份: ${backup_path}"
+    fi
+    mv -f "${staged_path}" "${binary_path}"
+
+    # 非默认平台通过统一入口软链接到带后缀的文件。
+    if [ -n "${suffix}" ]; then
         ln -sf "$(basename "${binary_path}")" "${final_bin}"
     fi
 
