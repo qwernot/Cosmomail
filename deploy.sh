@@ -1028,15 +1028,21 @@ _cmd_status() {
 _cmd_logs() {
     local lines="${1:-100}"
 
-    if [ ! -f "${COSMOMAIL_LOG_FILE}" ]; then
-        error "日志文件不存在: ${COSMOMAIL_LOG_FILE}"
-        exit 1
+    if [ -f "${COSMOMAIL_LOG_FILE}" ]; then
+        echo ""
+        echo -e "${CYAN}${BOLD}最近 ${lines} 行日志${NC} (${COSMOMAIL_LOG_FILE})"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        tail -n "${lines}" "${COSMOMAIL_LOG_FILE}" 2>/dev/null || error "无法读取日志"
+        return
     fi
 
-    echo ""
-    echo -e "${CYAN}${BOLD}最近 ${lines} 行日志${NC} (${COSMOMAIL_LOG_FILE})"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    tail -n "${lines}" "${COSMOMAIL_LOG_FILE}" 2>/dev/null || error "无法读取日志"
+    if _is_linux && command -v journalctl >/dev/null 2>&1; then
+        journalctl -u "${COSMOMAIL_SERVICE}" -n "${lines}" --no-pager
+        return
+    fi
+
+    error "没有可用的 Cosmo Mail 日志"
+    exit 1
 }
 
 # ─── 版本信息（自包含）──────────────────────────────
