@@ -23,14 +23,14 @@ import (
 
 // WebhookService Webhook 业务逻辑
 type WebhookService struct {
-	db *gorm.DB
+	db         *gorm.DB
 	httpClient *http.Client
 }
 
 // NewWebhookService 创建 Webhook Service
 func NewWebhookService(db *gorm.DB) *WebhookService {
 	return &WebhookService{
-		db: db,
+		db:         db,
 		httpClient: &http.Client{Timeout: 15 * time.Second},
 	}
 }
@@ -185,13 +185,13 @@ func (s *WebhookService) dispatch(hook *models.Webhook, payload models.WebhookPa
 	// 设置标准请求头
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Cosmo Mail-Webhook/1.0")
-	req.Header.Set("X-Cosmo Mail-Event", payload.Event)
-	req.Header.Set("X-Cosmo Mail-Timestamp", fmt.Sprintf("%d", payload.Timestamp))
+	req.Header.Set(notifier.HeaderEvent, payload.Event)
+	req.Header.Set(notifier.HeaderTimestamp, fmt.Sprintf("%d", payload.Timestamp))
 
 	// 签名
 	if hook.Secret != "" {
 		sig := generateSignature(hook.Secret, bodyBytes)
-		req.Header.Set("X-Cosmo Mail-Signature", "sha256="+sig)
+		req.Header.Set(notifier.HeaderSignature, "sha256="+sig)
 	}
 
 	// 自定义 Headers
@@ -240,9 +240,9 @@ func (s *WebhookService) updateHookAfterDispatch(hook *models.Webhook, result *T
 	}
 
 	s.db.Model(hook).Updates(map[string]interface{}{
-		"last_status":    status,
+		"last_status":     status,
 		"last_trigger_at": now,
-		"error_msg":      errMsg,
+		"error_msg":       errMsg,
 	})
 }
 
@@ -250,12 +250,12 @@ func (s *WebhookService) updateHookAfterDispatch(hook *models.Webhook, result *T
 func (s *WebhookService) saveLog(webhookID uint, event string, result *TestResult) {
 	logEntry := models.WebhookLog{
 		WebhookID:    webhookID,
-		Event:       event,
-		Status:      map[bool]string{true: "success", false: "error"}[result.Success],
+		Event:        event,
+		Status:       map[bool]string{true: "success", false: "error"}[result.Success],
 		ResponseCode: result.StatusCode,
 		ResponseBody: result.Response,
-		Duration:    result.Duration,
-		ErrorMsg:    result.ErrorMsg,
+		Duration:     result.Duration,
+		ErrorMsg:     result.ErrorMsg,
 	}
 	// 需要获取 URL
 	var hook models.Webhook
@@ -288,19 +288,19 @@ func (s *WebhookService) GetLogs(webhookID uint, limit int) ([]models.WebhookLog
 // toResponse 转换为响应 DTO
 func (s *WebhookService) toResponse(hook models.Webhook) models.WebhookResponse {
 	return models.WebhookResponse{
-		ID:           hook.ID,
-		Name:         hook.Name,
-		URL:          hook.URL,
-		Events:       hook.Events,
-		HasSecret:    hook.Secret != "",
-		Headers:      hook.Headers,
-		Body:         hook.Body,
-		Enabled:      hook.Enabled,
-		LastStatus:   hook.LastStatus,
+		ID:            hook.ID,
+		Name:          hook.Name,
+		URL:           hook.URL,
+		Events:        hook.Events,
+		HasSecret:     hook.Secret != "",
+		Headers:       hook.Headers,
+		Body:          hook.Body,
+		Enabled:       hook.Enabled,
+		LastStatus:    hook.LastStatus,
 		LastTriggerAt: hook.LastTriggerAt,
-		ErrorMsg:     hook.ErrorMsg,
-		CreatedAt:    hook.CreatedAt,
-		UpdatedAt:    hook.UpdatedAt,
+		ErrorMsg:      hook.ErrorMsg,
+		CreatedAt:     hook.CreatedAt,
+		UpdatedAt:     hook.UpdatedAt,
 	}
 }
 

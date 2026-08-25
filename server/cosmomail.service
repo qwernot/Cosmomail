@@ -16,7 +16,7 @@ Environment="COSMOMAIL_PORT=8080"
 Environment="COSMOMAIL_HOST=0.0.0.0"
 Environment="COSMOMAIL_DSN=/var/lib/cosmomail/data/cosmomail.db"
 Environment="COSMOMAIL_POLL_INTERVAL=5"
-Environment="COSMOMAIL_IDLE_ENABLED=true"
+Environment="COSMOMAIL_IDLE_ENABLED=false"
 Environment="COSMOMAIL_MAX_CONCURRENT=10"
 Environment="COSMOMAIL_SYNC_BATCH_SIZE=50"
 Restart=on-failure

@@ -19,6 +19,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// Webhook header names must be RFC 7230 tokens; product display names may contain spaces.
+const (
+	HeaderEvent     = "X-Cosmomail-Event"
+	HeaderTimestamp = "X-Cosmomail-Timestamp"
+	HeaderSignature = "X-Cosmomail-Signature"
+)
+
 // WebhookPayload 推送数据结构
 type Payload struct {
 	Event     string                 `json:"event"`
@@ -70,16 +77,16 @@ func TriggerByEvent(db *gorm.DB, event string, data map[string]interface{}) {
 				errMsg = result.ErrorMsg
 			}
 			db.Table("webhooks").Where("id = ?", hook.ID).Updates(map[string]interface{}{
-				"last_status":    status,
+				"last_status":     status,
 				"last_trigger_at": now,
-				"error_msg":      errMsg,
+				"error_msg":       errMsg,
 			})
 			log.Printf("[Webhook] %s -> %s (%dms) %s%s", event, hook.URL, result.Duration, status, func() string {
-			if status == "error" && result.ErrorMsg != "" {
-				return " | " + result.ErrorMsg
-			}
-			return ""
-		}())
+				if status == "error" && result.ErrorMsg != "" {
+					return " | " + result.ErrorMsg
+				}
+				return ""
+			}())
 		}(h)
 	}
 }
@@ -159,13 +166,13 @@ func doDispatch(h *hookInfo, payload Payload, event string) *dispatchResult {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Cosmo Mail-Webhook/1.0")
-	req.Header.Set("X-Cosmo Mail-Event", payload.Event)
-	req.Header.Set("X-Cosmo Mail-Timestamp", fmt.Sprintf("%d", payload.Timestamp))
+	req.Header.Set(HeaderEvent, payload.Event)
+	req.Header.Set(HeaderTimestamp, fmt.Sprintf("%d", payload.Timestamp))
 
 	if h.Secret != "" {
 		mac := hmac.New(sha256.New, []byte(h.Secret))
 		mac.Write(bodyBytes)
-		req.Header.Set("X-Cosmo Mail-Signature", "sha256="+hex.EncodeToString(mac.Sum(nil)))
+		req.Header.Set(HeaderSignature, "sha256="+hex.EncodeToString(mac.Sum(nil)))
 	}
 
 	if h.Headers != "" {

@@ -50,8 +50,8 @@ $env:COSMOMAIL_DSN = "data/cosmomail.db"
 |---|---:|---|
 | `COSMOMAIL_PORT` | `8080` | Web 服务端口 |
 | `COSMOMAIL_DSN` | `data/cosmomail.db` | SQLite 数据库路径 |
-| `COSMOMAIL_POLL_INTERVAL` | `60` | IDLE 校验及降级轮询间隔（秒） |
-| `COSMOMAIL_IDLE_ENABLED` | `true` | 启用 IMAP IDLE |
+| `COSMOMAIL_POLL_INTERVAL` | `5` | 全邮箱增量轮询间隔（秒，最小 5 秒） |
+| `COSMOMAIL_IDLE_ENABLED` | `false` | 可选启用 IMAP IDLE；默认使用统一轮询 |
 | `COSMOMAIL_MAX_CONCURRENT` | `10` | 最大同步并发数 |
 | `COSMOMAIL_SYNC_BATCH_SIZE` | `50` | 单次同步处理上限 |
 

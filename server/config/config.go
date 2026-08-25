@@ -36,7 +36,7 @@ type DatabaseConfig struct {
 // IMAPConfig IMAP 同步配置
 type IMAPConfig struct {
 	PollInterval      int   // 定时轮询间隔（秒），默认 5
-	IDLEEnabled       bool  // 是否启用 IDLE，默认 true
+	IDLEEnabled       bool  // 是否启用 IDLE，默认 false（统一使用 5 秒增量轮询）
 	MaxConcurrent     int   // 最大并发连接数，默认 10
 	SyncBatchSize     int   // 每次拉取邮件数量上限，默认 50
 	MaxAttachmentSize int64 // 单附件大小上限（MB），默认 50，0=不限制
@@ -173,7 +173,7 @@ func Load() *Config {
 		},
 		IMAP: IMAPConfig{
 			PollInterval:      pollInterval,
-			IDLEEnabled:       getEnvBool("COSMOMAIL_IDLE_ENABLED", true),
+			IDLEEnabled:       getEnvBool("COSMOMAIL_IDLE_ENABLED", false),
 			MaxConcurrent:     maxConcurrent,
 			SyncBatchSize:     syncBatchSize,
 			MaxAttachmentSize: maxAttachmentSize,
