@@ -1,0 +1,62 @@
+# Dependencies
+server/vendor/
+
+# Build output
+server/bin/
+server/*.exe
+server/*.exe~
+server/*.dll
+server/*.so
+server/*.dylib
+server/mail-proxy
+server/mail-proxy.exe
+server/dist
+
+/bin/
+
+# Data (SQLite DB, attachments)
+server/data/
+*.db
+*.db-wal
+*.db-shm
+
+# Frontend
+web/node_modules/
+web/dist/
+web/.vite/
+server/embedfs/dist/
+
+# IDE
+.idea/
+.vscode/
+.agents/
+.codebuddy/
+skills-lock.json
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+*.tmp
+*.temp
+.cache/
+
+.dev-logs/
+.dev-pids/
+**/.pnpm-store
+**/tmp

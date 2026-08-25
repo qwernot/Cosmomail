@@ -1,0 +1,87 @@
+/*
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Copyright (C) 2026  magiccode (魔法代码)
+*/
+/* ============================================
+   Cosmo Mail - 响应式断点
+   手机 / 平板 / PC 自适应布局
+   ============================================ */
+
+/* ---- 平板横屏以下 (≤1024px) ---- */
+@media (max-width: 1024px) {
+  .app-main {
+    margin-left: 0 !important;
+  }
+
+  :root {
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 0;
+  }
+
+  /* 侧边栏改为抽屉式 */
+  .app-sidebar {
+    position: fixed !important;
+    left: -280px;
+    z-index: var(--z-sidebar);
+    box-shadow: none;
+    transition: left var(--transition-slow);
+  }
+
+  .app-sidebar.open {
+    left: 0;
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+/* ---- 手机竖屏 (≤768px) ---- */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 56px;
+    --font-size-base: 14px;
+  }
+
+  .app-content {
+    padding: 16px;
+  }
+
+  /* 按钮尺寸适配 */
+  .btn { padding: 7px 14px; font-size: var(--font-size-sm); }
+  .btn-lg { padding: 9px 18px; }
+  
+  /* 输入框适配 */
+  .input { padding: 9px 12px; }
+
+  /* 卡片内边距缩小 */
+  .card { padding: var(--space-md) !important; border-radius: var(--radius-md); }
+
+  /* 表格/列表项间距紧凑 */
+  .mail-item {
+    padding: var(--space-sm) var(--space-md) !important;
+  }
+}
+
+/* ---- 超小屏幕 (≤480px) ---- */
+@media (max-width: 480px) {
+  .app-content { padding: 12px; }
+
+  .btn {
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+/* ---- 大屏优化 (≥1440px) ---- */
+/*@media (min-width: 1440px) {
+  .app-content {
+    max-width: 1400px;
+  }
+}*/
+
+/* ---- 打印样式 ---- */
+@media print {
+  .app-sidebar, .app-header, .no-print {
+    display: none !important;
+  }
+  .app-main { margin-left: 0 !important; }
+  body { background: #fff; color: #000; }
+}

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# VitePress build output & cache
+.vitepress/dist/
+.vitepress/cache/
+.vitepress/vitepress.cache.*
+
+# Environment (base path config etc.)
+.env
+.env.local
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp
+*.tmp
+*.temp
+
+# Local overrides (user-specific config)
+*.local

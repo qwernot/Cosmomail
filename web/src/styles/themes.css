@@ -1,0 +1,58 @@
+/*
+  SPDX-License-Identifier: AGPL-3.0-or-later
+  Copyright (C) 2026  magiccode (魔法代码)
+*/
+/* ============================================
+   Cosmo Mail - 主题变量
+
+   设计原则：所有装饰性颜色（背景、边框、阴影、交互态等）
+   均从主题色（--primary-*）衍生，由 JS 动态生成。
+
+   本文件仅保留：
+   - 文字可读性颜色（中性灰，不随主题色变化）
+   - 功能语义颜色（成功/错误/警告，保持独立辨识度）
+   ============================================ */
+
+/* ====== 浅色主题 ====== */
+:root, [data-theme="light"] {
+  color-scheme: light;
+  /* ---- 文字色（保持中性灰以确保可读性）---- */
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-tertiary: #94A3B8;
+  --text-inverse: #FFFFFF;
+  --text-link: var(--primary-500);
+  --text-on-primary: #FFFFFF;
+
+  /* ---- 功能语义色（保持独立，不受主题色影响）---- */
+  --success: #10B981;
+  --success-light: #ECFDF5;
+  --error: #EF4444;
+  --error-light: #FEF2F2;
+  --warning: #F59E0B;
+  --warning-light: #FFFBEB;
+  --info: #06B6D4;
+  --info-light: #ECFEFF;
+}
+
+/* ====== 深色主题 ====== */
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* ---- 文字色 ---- */
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-inverse: #0f172a;
+  --text-link: var(--primary-400);
+  --text-on-primary: #FFFFFF;
+
+  /* ---- 功能语义色（深色模式下提亮）---- */
+  --success: #34D399;
+  --success-light: rgba(16, 185, 129, 0.12);
+  --error: #F87171;
+  --error-light: rgba(239, 68, 68, 0.12);
+  --warning: #FBBF24;
+  --warning-light: rgba(245, 158, 11, 0.12);
+  --info: #22D3EE;
+  --info-light: rgba(6, 182, 212, 0.12);
+}

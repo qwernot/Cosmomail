@@ -1,0 +1,82 @@
+name: Build & Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm build
+        working-directory: web
+      - uses: actions/upload-artifact@v5
+        with:
+          name: frontend-dist
+          path: server/dist/
+
+  build-binary:
+    needs: build-frontend
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { goos: linux, goarch: amd64, suffix: '' }
+          - { goos: linux, goarch: arm, goarm: '7', suffix: '-arm' }
+          - { goos: linux, goarch: arm64, suffix: '-arm64' }
+          - { goos: darwin, goarch: amd64, suffix: '-macos-x86_64' }
+          - { goos: darwin, goarch: arm64, suffix: '-macos-arm64' }
+          - { goos: windows, goarch: amd64, suffix: '.exe' }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+          cache-dependency-path: server/go.sum
+      - uses: actions/download-artifact@v5
+        with:
+          name: frontend-dist
+          path: server/embedfs/dist/
+      - name: Build
+        working-directory: server
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm || '7' }}
+          CGO_ENABLED: 0
+        run: go build -ldflags="-s -w -X main.isProduction=true" -o "../dist/cosmomail${{ matrix.suffix }}" .
+      - uses: actions/upload-artifact@v5
+        with:
+          name: cosmomail-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/cosmomail${{ matrix.suffix }}
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          pattern: cosmomail-*
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/*
