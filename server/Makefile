@@ -2,7 +2,7 @@
 # 用法: make build / make run / make install
 
 APP_NAME := cosmomail
-VERSION := 1.1.5
+VERSION := 1.1.6
 BUILD_TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "dev")
 
