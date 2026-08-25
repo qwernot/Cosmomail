@@ -1,0 +1,15 @@
+#!/bin/bash
+
+PORT="${wizard_port:-8800}"
+case "${PORT}" in
+    ''|*[!0-9]*)
+        exit 1
+        ;;
+esac
+if [ "${PORT}" -lt 10 ] || [ "${PORT}" -gt 65535 ]; then
+    exit 1
+fi
+mkdir -p "${TRIM_PKGETC}"
+printf '%s\n' "${PORT}" > "${TRIM_PKGETC}/port"
+exit 0
+

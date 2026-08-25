@@ -1,0 +1,25 @@
+#!/bin/bash
+
+PORT="${wizard_port:-8800}"
+case "${PORT}" in
+    ''|*[!0-9]*)
+        echo "端口必须是数字" > "${TRIM_TEMP_LOGFILE}"
+        exit 1
+        ;;
+esac
+if [ "${PORT}" -lt 10 ] || [ "${PORT}" -gt 65535 ]; then
+    echo "端口必须在 10 到 65535 之间" > "${TRIM_TEMP_LOGFILE}"
+    exit 1
+fi
+if command -v ss >/dev/null 2>&1 && ss -ltn 2>/dev/null | grep -Eq "[:.]${PORT}[[:space:]]"; then
+    echo "端口 ${PORT} 已被占用，请返回并选择其他端口" > "${TRIM_TEMP_LOGFILE}"
+    exit 1
+fi
+if ! command -v ss >/dev/null 2>&1 && command -v netstat >/dev/null 2>&1 \
+    && netstat -ltn 2>/dev/null | grep -Eq "[:.]${PORT}[[:space:]]"; then
+    echo "端口 ${PORT} 已被占用，请返回并选择其他端口" > "${TRIM_TEMP_LOGFILE}"
+    exit 1
+fi
+mkdir -p "${TRIM_PKGETC}"
+printf '%s\n' "${PORT}" > "${TRIM_PKGETC}/port"
+exit 0

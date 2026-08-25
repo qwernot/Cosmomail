@@ -77,6 +77,20 @@ jobs:
           path: artifacts
           pattern: cosmomail-*
           merge-multiple: true
+      - name: Build fnOS package
+        run: |
+          sed -i "s/^version=.*/version=${GITHUB_REF_NAME#v}/" fnapp/manifest
+          cp artifacts/cosmomail fnapp/app/server/cosmomail
+          chmod +x fnapp/app/server/cosmomail fnapp/cmd/*
+          cp public/images/icon_64.png fnapp/ICON.PNG
+          cp public/images/icon_256.png fnapp/ICON_256.PNG
+          cp public/images/icon_64.png fnapp/app/ui/images/icon-64.png
+          cp public/images/icon_256.png fnapp/app/ui/images/icon-256.png
+          cp LICENSE fnapp/LICENSE
+          curl -fsSL https://static2.fnnas.com/fnpack/fnpack-1.2.1-linux-amd64 -o fnpack
+          chmod +x fnpack
+          (cd fnapp && ../fnpack build)
+          mv fnapp/com.qwernot.cosmomail.fpk "artifacts/CosmoMail-fnOS-x86_64-${GITHUB_REF_NAME}.fpk"
       - uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true

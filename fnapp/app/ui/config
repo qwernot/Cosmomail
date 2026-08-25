@@ -1,0 +1,16 @@
+{
+  ".url": {
+    "com.qwernot.cosmomail.Application": {
+      "title": "Cosmo Mail",
+      "icon": "images/icon-{0}.png",
+      "type": "url",
+      "protocol": "http",
+      "port": "${wizard_port}",
+      "url": "/",
+      "allUsers": true,
+      "control": {
+        "accessPerm": "readonly"
+      }
+    }
+  }
+}

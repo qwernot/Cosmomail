@@ -13,6 +13,9 @@ server/mail-proxy.exe
 server/dist
 
 /bin/
+fnapp/app/server/cosmomail
+fnapp/*.fpk
+/*.fpk
 
 # Data (SQLite DB, attachments)
 server/data/

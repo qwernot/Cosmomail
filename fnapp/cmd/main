@@ -1,0 +1,108 @@
+#!/bin/bash
+
+LOG_FILE="${TRIM_PKGVAR}/cosmomail.log"
+PID_FILE="${TRIM_PKGVAR}/cosmomail.pid"
+DATA_DIR="${TRIM_PKGVAR}/data"
+APP_BIN="${TRIM_APPDEST}/server/cosmomail"
+PORT_FILE="${TRIM_PKGETC}/port"
+APP_PORT="${wizard_port:-${TRIM_SERVICE_PORT:-8800}}"
+
+if [ -r "${PORT_FILE}" ]; then
+    saved_port="$(head -n 1 "${PORT_FILE}" | tr -d '[:space:]')"
+    case "${saved_port}" in
+        ''|*[!0-9]*) ;;
+        *) APP_PORT="${saved_port}" ;;
+    esac
+fi
+
+log_msg() {
+    printf '%s - %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >> "${LOG_FILE}"
+}
+
+read_pid() {
+    [ -r "${PID_FILE}" ] || return 1
+    head -n 1 "${PID_FILE}" | tr -d '[:space:]'
+}
+
+check_process() {
+    local pid="$1"
+    [ -n "${pid}" ] && kill -0 "${pid}" 2>/dev/null
+}
+
+status() {
+    local pid
+    pid="$(read_pid)" || return 1
+    if check_process "${pid}"; then
+        return 0
+    fi
+    rm -f "${PID_FILE}"
+    return 1
+}
+
+start_process() {
+    if status; then
+        return 0
+    fi
+
+    mkdir -p "${DATA_DIR}"
+    chmod 700 "${DATA_DIR}"
+    chmod +x "${APP_BIN}"
+    log_msg "Starting Cosmo Mail on port ${APP_PORT}"
+
+    (
+        cd "${TRIM_PKGVAR}" || exit 1
+        export COSMOMAIL_ENV=production
+        export COSMOMAIL_HOST=0.0.0.0
+        export COSMOMAIL_PORT="${APP_PORT}"
+        export COSMOMAIL_DSN="${DATA_DIR}/cosmomail.db"
+        exec "${APP_BIN}"
+    ) >> "${LOG_FILE}" 2>&1 &
+
+    printf '%s' "$!" > "${PID_FILE}"
+    sleep 1
+    if ! status; then
+        log_msg "Cosmo Mail failed to start"
+        return 1
+    fi
+    return 0
+}
+
+stop_process() {
+    local pid
+    pid="$(read_pid)" || return 0
+    if ! check_process "${pid}"; then
+        rm -f "${PID_FILE}"
+        return 0
+    fi
+
+    log_msg "Stopping Cosmo Mail (pid=${pid})"
+    kill -TERM "${pid}" 2>/dev/null || true
+    local count=0
+    while check_process "${pid}" && [ "${count}" -lt 15 ]; do
+        sleep 1
+        count=$((count + 1))
+    done
+    if check_process "${pid}"; then
+        kill -KILL "${pid}" 2>/dev/null || true
+    fi
+    rm -f "${PID_FILE}"
+    return 0
+}
+
+case "${1:-}" in
+start)
+    start_process
+    ;;
+stop)
+    stop_process
+    ;;
+status)
+    if status; then
+        exit 0
+    fi
+    exit 3
+    ;;
+*)
+    exit 1
+    ;;
+esac

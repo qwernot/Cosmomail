@@ -1,0 +1,8 @@
+{
+  "defaults": {
+    "run-as": "package"
+  },
+  "username": "com.qwernot.cosmomail",
+  "groupname": "com.qwernot.cosmomail"
+}
+
