@@ -7,17 +7,7 @@
     <!-- Logo 区域 -->
     <div class="sidebar-logo">
       <button class="logo-btn" @click="$emit('navigate', '/mails')">
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
-          <path d="M8 12L16 17L24 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="7" y="10" width="18" height="13" rx="2" stroke="white" stroke-width="1.8" fill="none"/>
-          <defs>
-            <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32">
-              <stop stop-color="var(--primary-500, #4F6EF7)"/>
-              <stop offset="1" stop-color="var(--primary-400, #6C8AFF)"/>
-            </linearGradient>
-          </defs>
-        </svg>
+        <img class="sidebar-brand-icon" src="/icons/icon-64x64.png" alt="" />
         <span v-show="!collapsed" class="logo-text">Cosmo Mail</span>
       </button>
       <button v-if="isMobile && !collapsed" class="btn-icon btn-ghost close-btn" @click="mobileOpen = false">
@@ -265,6 +255,14 @@ onUnmounted(() => {
   padding: 6px;
 }
 .logo-btn:hover { background: var(--bg-hover); }
+
+.sidebar-brand-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 7px rgba(83, 40, 99, 0.18));
+}
 
 .logo-text {
   font-size: var(--font-size-lg);

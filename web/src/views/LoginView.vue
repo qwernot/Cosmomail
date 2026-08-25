@@ -1,257 +1,204 @@
-<!-- 
+<!--
   SPDX-License-Identifier: AGPL-3.0-or-later
-  Copyright (C) 2026  magiccode (魔法代码)
+  Copyright (C) 2026 magiccode (魔法代码)
+  Modifications Copyright (C) 2026 Cosmo Mail contributors
 -->
 <template>
-  <div class="login-page">
-    <!-- 背景装饰 -->
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
-    <div class="bg-orb bg-orb-3"></div>
-    <div class="bg-grid"></div>
+  <div class="auth-page">
+    <div class="aurora aurora-pink"></div>
+    <div class="aurora aurora-mint"></div>
+    <div class="star-field"></div>
 
-    <!-- 主题切换按钮 -->
-    <button class="login-theme-toggle" @click="appStore.toggleTheme()" :title="themeTitle">
-      <!-- 跟随系统 -->
-      <svg v-show="appStore.themeMode === 'system'" width="20" height="20" viewBox="0 0 28 28">
-        <rect x="2" y="6" width="24" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
-        <circle cx="9.5" cy="14" r="3.5" fill="currentColor"/>
-        <path d="M19 10a4 4 0 0 1 0 8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+    <button class="theme-toggle" type="button" @click="appStore.toggleTheme()" :title="themeTitle" aria-label="切换主题">
+      <svg v-if="appStore.themeMode === 'system'" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M8 21h8M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-      <!-- 浅色模式 -->
-      <svg v-show="appStore.themeMode === 'light'" width="20" height="20" viewBox="0 0 28 28">
-        <circle cx="14" cy="14" r="7" fill="currentColor"/>
-        <path d="M14 3v2M14 23v2M26 14h-2M4 14H2M22.2 22.2l-1.4-1.4M7.2 7.2L5.8 5.8M22.2 5.8l-1.4 1.4M7.2 20.8L5.8 22.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <svg v-else-if="appStore.themeMode === 'light'" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.5" fill="currentColor"/>
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
       </svg>
-      <!-- 深色模式 -->
-      <svg v-show="appStore.themeMode === 'dark'" width="20" height="20" viewBox="0 0 28 28">
-        <path d="M21 15a8 8 0 1 1-12-7A9 9 0 0 0 21 15z" fill="currentColor"/>
+      <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19.5 14.5A8 8 0 0 1 9.5 4.4a8 8 0 1 0 10 10.1Z" fill="currentColor"/>
       </svg>
     </button>
 
-    <div class="login-container" :class="{ 'is-register': isRegister }">
-      <!-- 左侧品牌区 -->
-      <div class="login-brand">
-        <div class="brand-content">
-          <div class="brand-icon">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-              <rect x="4" y="10" width="40" height="28" rx="6" stroke="white" stroke-width="2.5"/>
-              <path d="M4 16h40" stroke="white" stroke-width="2"/>
-              <path d="M20 26l5 4 8-9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="15" cy="24" r="3.5" stroke="white" stroke-width="2"/>
-            </svg>
+    <main class="auth-layout">
+      <section class="brand-scene" aria-label="Cosmo Mail">
+        <div class="brand-lockup">
+          <div class="logo-orbit">
+            <span class="orbit orbit-one"></span>
+            <span class="orbit orbit-two"></span>
+            <img src="/icons/icon-512x512.png" alt="" class="brand-logo" />
+            <i class="satellite satellite-one"></i>
+            <i class="satellite satellite-two"></i>
           </div>
-          <h1 class="brand-title">Cosmo Mail</h1>
-          <p class="brand-desc">简洁 · 安全 · 高效的邮件管理平台</p>
-
-          <div class="brand-features">
-            <div class="feature-item">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M14.5 7l-5.25 5.5L3.5 6.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>多账号统一收信</span>
-            </div>
-            <div class="feature-item">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M14.5 7l-5.25 5.5L3.5 6.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>实时同步 IMAP / POP3</span>
-            </div>
-            <div class="feature-item">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M14.5 7l-5.25 5.5L3.5 6.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Webhook 即时通知</span>
-            </div>
+          <p class="brand-kicker">COSMO MAIL</p>
+          <h1>把所有邮箱，<br />收进同一片轨道。</h1>
+          <p class="brand-copy">聚合多个邮箱账号，快速同步、集中阅读，让每一封重要邮件都准时抵达。</p>
+          <div class="feature-row" aria-label="产品特点">
+            <span><i></i> 增量同步</span>
+            <span><i></i> 本地存储</span>
+            <span><i></i> 实时提醒</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 右侧表单区 -->
-      <div class="login-form-area">
-        <transition name="form-slide" mode="out-in">
-          <!-- 登录表单 -->
+      <section class="auth-card" :class="{ 'register-card': isRegister }">
+        <div class="mobile-brand">
+          <img src="/icons/icon-128x128.png" alt="" />
+          <span>Cosmo Mail</span>
+        </div>
+
+        <transition name="panel-fade" mode="out-in">
           <div v-if="!isRegister" key="login" class="form-panel">
-            <div class="form-header">
-              <h2 class="form-title">欢迎回来</h2>
-              <p class="form-subtitle">请输入您的管理员账号</p>
-            </div>
+            <header class="form-header">
+              <p class="form-eyebrow">WELCOME BACK</p>
+              <h2>登录你的收件空间</h2>
+              <p>使用管理员账号继续进入 Cosmo Mail</p>
+            </header>
 
-            <form @submit.prevent="handleSubmit" class="auth-form" autocomplete="on">
-              <div class="field-group" :class="{ error: errors.username, focused: focused === 'username' }">
-                <label class="field-label">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="5" r="3.5" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4"/>
+            <form class="auth-form" autocomplete="on" @submit.prevent="handleSubmit">
+              <label class="field" :class="{ focused: focused === 'username', invalid: errors.username }">
+                <span class="field-caption">用户名</span>
+                <span class="input-wrap">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M4.5 21c.5-4.2 3-6.5 7.5-6.5s7 2.3 7.5 6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                   </svg>
-                  用户名
-                </label>
-                <input
-                  ref="usernameInput"
-                  v-model="form.username"
-                  type="text"
-                  placeholder="请输入用户名"
-                  autocomplete="username"
-                  @focus="focused = 'username'"
-                  @blur="focused = ''"
-                />
-                <span v-if="errors.username" class="field-error">{{ errors.username }}</span>
-              </div>
+                  <input
+                    ref="usernameInput"
+                    v-model="form.username"
+                    type="text"
+                    placeholder="请输入用户名"
+                    autocomplete="username"
+                    @focus="focused = 'username'"
+                    @blur="focused = ''"
+                  />
+                </span>
+                <small v-if="errors.username">{{ errors.username }}</small>
+              </label>
 
-              <div class="field-group" :class="{ error: errors.password, focused: focused === 'password' }">
-                <label class="field-label">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M5 7V5a3 3 0 1 1 6 0v2" stroke="currentColor" stroke-width="1.4"/>
-                    <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
+              <label class="field" :class="{ focused: focused === 'password', invalid: errors.password }">
+                <span class="field-caption">密码</span>
+                <span class="input-wrap">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="10" width="16" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.7"/>
                   </svg>
-                  密码
-                </label>
-                <input
-                  v-model="form.password"
-                  ref="passwordInput"
-                  :type="showPassword ? 'text' : 'password'"
-                  placeholder="请输入密码"
-                  autocomplete="current-password"
-                  @focus="focused = 'password'"
-                  @blur="focused = ''"
-                />
-                <button type="button" class="pwd-toggle" @click="showPassword = !showPassword" tabindex="-1">
-                  <svg v-if="!showPassword" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8z" stroke="currentColor" stroke-width="1.3"/>
-                    <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
-                  </svg>
-                  <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M2 2l12 12M1 8s2.5-4.5 7-4.5c1.4 0 2.6.35 3.65.95L15 1.05M4.35 12.55C5.35 13.17 6.62 13.5 8 13.5c4.5 0 7-4.5 7-4.5s-.85-1.53-2.32-2.88" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                    <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
-                  </svg>
-                </button>
-                <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
-              </div>
+                  <input
+                    ref="passwordInput"
+                    v-model="form.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    placeholder="请输入密码"
+                    autocomplete="current-password"
+                    @focus="focused = 'password'"
+                    @blur="focused = ''"
+                  />
+                  <button class="reveal-button" type="button" tabindex="-1" @click="showPassword = !showPassword">
+                    {{ showPassword ? '隐藏' : '显示' }}
+                  </button>
+                </span>
+                <small v-if="errors.password">{{ errors.password }}</small>
+              </label>
 
-              <div v-if="errorMsg" class="form-error-bar">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
-                  <path d="M7 4v3M7 9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                </svg>
-                {{ errorMsg }}
-              </div>
+              <div v-if="errorMsg" class="error-message" role="alert">{{ errorMsg }}</div>
 
-              <button type="submit" class="btn-submit" :disabled="submitting">
-                <span v-if="submitting" class="btn-spinner"></span>
-                <template v-else>登 录</template>
+              <button class="submit-button" type="submit" :disabled="submitting">
+                <span v-if="submitting" class="spinner"></span>
+                <template v-else>
+                  进入邮箱
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h13M14 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </template>
               </button>
 
-              <button v-if="canRegister" type="button" class="btn-switch-mode" @click="switchToRegister">
-                还没有账号？立即注册
+              <button v-if="canRegister" class="mode-button" type="button" @click="switchToRegister">
+                首次使用？创建管理员账号
               </button>
             </form>
           </div>
 
-          <!-- 注册表单 -->
           <div v-else key="register" class="form-panel">
-            <div class="form-header">
-              <h2 class="form-title">初始化管理员</h2>
-              <p class="form-subtitle">创建您的管理员账号以开始使用</p>
-            </div>
+            <header class="form-header">
+              <p class="form-eyebrow">FIRST LAUNCH</p>
+              <h2>创建管理员账号</h2>
+              <p>完成初始化后，就可以添加你的邮箱</p>
+            </header>
 
-            <form @submit.prevent="handleRegister" class="auth-form" autocomplete="on">
-              <div class="field-group" :class="{ error: errors.username, focused: focused === 'username' }">
-                <label class="field-label">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="5" r="3.5" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4"/>
+            <form class="auth-form" autocomplete="on" @submit.prevent="handleRegister">
+              <label class="field" :class="{ focused: focused === 'username', invalid: errors.username }">
+                <span class="field-caption">管理员用户名</span>
+                <span class="input-wrap">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M4.5 21c.5-4.2 3-6.5 7.5-6.5s7 2.3 7.5 6.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                   </svg>
-                  用户名
-                </label>
-                <input
-                  v-model="regForm.username"
-                  type="text"
-                  placeholder="设置管理员用户名"
-                  autocomplete="new-username"
-                  autofocus
-                  @focus="focused = 'username'"
-                  @blur="focused = ''"
-                />
-                <span v-if="errors.username" class="field-error">{{ errors.username }}</span>
-              </div>
+                  <input
+                    v-model="regForm.username"
+                    type="text"
+                    placeholder="3–32 个字符"
+                    autocomplete="username"
+                    @focus="focused = 'username'"
+                    @blur="focused = ''"
+                  />
+                </span>
+                <small v-if="errors.username">{{ errors.username }}</small>
+              </label>
 
-              <div class="field-group" :class="{ error: errors.password, focused: focused === 'password' }">
-                <label class="field-label">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M5 7V5a3 3 0 1 1 6 0v2" stroke="currentColor" stroke-width="1.4"/>
-                    <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
+              <label class="field" :class="{ focused: focused === 'password', invalid: errors.password }">
+                <span class="field-caption">设置密码</span>
+                <span class="input-wrap">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="10" width="16" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.7"/>
                   </svg>
-                  密码
-                </label>
-                <input
-                  v-model="regForm.password"
-                  :type="showRegPassword ? 'text' : 'password'"
-                  placeholder="至少 6 位密码"
-                  autocomplete="new-password"
-                  @focus="focused = 'password'"
-                  @blur="focused = ''"
-                />
-                <button type="button" class="pwd-toggle" @click="showRegPassword = !showRegPassword" tabindex="-1">
-                  <svg v-if="!showRegPassword" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
-                  </svg>
-                  <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M2 2l12 12M1 8s2.5-4.5 7-4.5c1.4 0 2.6.35 3.65.95L15 1.05M4.35 12.55C5.35 13.17 6.62 13.5 8 13.5c4.5 0 7-4.5 7-4.5s-.85-1.53-2.32-2.88" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                    <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/>
-                  </svg>
-                </button>
-                <span v-if="errors.password" class="field-error">{{ errors.password }}</span>
-              </div>
+                  <input
+                    v-model="regForm.password"
+                    :type="showRegPassword ? 'text' : 'password'"
+                    placeholder="至少 6 位"
+                    autocomplete="new-password"
+                    @focus="focused = 'password'"
+                    @blur="focused = ''"
+                  />
+                  <button class="reveal-button" type="button" tabindex="-1" @click="showRegPassword = !showRegPassword">
+                    {{ showRegPassword ? '隐藏' : '显示' }}
+                  </button>
+                </span>
+                <small v-if="errors.password">{{ errors.password }}</small>
+              </label>
 
-              <div class="field-group" :class="{ error: errors.confirmPwd, focused: focused === 'confirmPwd' }">
-                <label class="field-label">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-                    <path d="M5 7V5a3 3 0 1 1 6 0v2" stroke="currentColor" stroke-width="1.4"/>
-                    <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
+              <label class="field" :class="{ focused: focused === 'confirmPwd', invalid: errors.confirmPwd }">
+                <span class="field-caption">确认密码</span>
+                <span class="input-wrap">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  确认密码
-                </label>
-                <input
-                  v-model="regForm.confirmPassword"
-                  :type="showRegPassword ? 'text' : 'password'"
-                  placeholder="再次输入密码"
-                  autocomplete="new-password"
-                  @focus="focused = 'confirmPwd'"
-                  @blur="focused = ''"
-                />
-                <span v-if="errors.confirmPwd" class="field-error">{{ errors.confirmPwd }}</span>
-              </div>
+                  <input
+                    v-model="regForm.confirmPassword"
+                    :type="showRegPassword ? 'text' : 'password'"
+                    placeholder="再次输入密码"
+                    autocomplete="new-password"
+                    @focus="focused = 'confirmPwd'"
+                    @blur="focused = ''"
+                  />
+                </span>
+                <small v-if="errors.confirmPwd">{{ errors.confirmPwd }}</small>
+              </label>
 
-              <div v-if="errorMsg" class="form-error-bar">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
-                  <path d="M7 4v3M7 9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                </svg>
-                {{ errorMsg }}
-              </div>
+              <div v-if="errorMsg" class="error-message" role="alert">{{ errorMsg }}</div>
 
-              <button type="submit" class="btn-submit btn-register" :disabled="submitting">
-                <span v-if="submitting" class="btn-spinner"></span>
-                <template v-else>创 建 账 号</template>
+              <button class="submit-button" type="submit" :disabled="submitting">
+                <span v-if="submitting" class="spinner"></span>
+                <template v-else>创建并进入</template>
               </button>
-
-              <button type="button" class="btn-switch-mode" @click="isRegister = false; clearErrors()">
-                已有账号？返回登录
-              </button>
+              <button class="mode-button" type="button" @click="isRegister = false; clearErrors()">返回登录</button>
             </form>
           </div>
         </transition>
-
-        <div class="login-footer">
-          <span>Cosmo Mail</span>
-          <span class="divider">·</span>
-          <span>v{{ __APP_VERSION__ }}</span>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -262,24 +209,18 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useAppStore } from '@/stores/appStore'
 
-// Vite define 注入的全局变量需在模板中显式引用
-const __APP_VERSION__ = import.meta.env.__APP_VERSION__ || '0.0.0'
-
 const router = useRouter()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
-// 主题切换提示文字
 const themeTitle = computed(() => {
   const titles = { system: '跟随系统', light: '浅色模式', dark: '深色模式' }
   return titles[appStore.themeMode] || '切换主题'
 })
 
-// 开发环境默认凭据
 const DEV_DEFAULT_USERNAME = import.meta.env.DEV ? 'admin' : ''
 const DEV_DEFAULT_PASSWORD = import.meta.env.DEV ? 'admin123' : ''
 
-// 表单状态
 const form = reactive({ username: DEV_DEFAULT_USERNAME, password: DEV_DEFAULT_PASSWORD })
 const regForm = reactive({ username: '', password: '', confirmPassword: '' })
 const errors = reactive({ username: '', password: '', confirmPwd: '' })
@@ -291,7 +232,6 @@ const focused = ref('')
 const usernameInput = ref(null)
 const passwordInput = ref(null)
 
-// 模式切换：登录 / 注册
 const isRegister = ref(authStore.setupRequired)
 const canRegister = computed(() => authStore.setupRequired)
 
@@ -307,14 +247,12 @@ function clearErrors() {
   errorMsg.value = ''
 }
 
-// 登录提交
 async function handleSubmit() {
   clearErrors()
   if (!form.username.trim()) { errors.username = '请输入用户名'; return }
   if (!form.password) { errors.password = '请输入密码'; return }
 
   submitting.value = true
-  errorMsg.value = ''
   try {
     await authStore.doLogin(form)
     router.push('/')
@@ -325,7 +263,6 @@ async function handleSubmit() {
   }
 }
 
-// 注册提交
 async function handleRegister() {
   clearErrors()
   let hasError = false
@@ -343,7 +280,6 @@ async function handleRegister() {
   if (hasError) return
 
   submitting.value = true
-  errorMsg.value = ''
   try {
     await authStore.doRegister(regForm)
     router.push('/')
@@ -355,12 +291,9 @@ async function handleRegister() {
 }
 
 onMounted(async () => {
-  if (!authStore.initialized) {
-    await authStore.init()
-  }
+  if (!authStore.initialized) await authStore.init()
   isRegister.value = authStore.setupRequired
 
-  // 开发环境自动聚焦到密码框（用户名已预填）
   if (import.meta.env.DEV && form.username) {
     await nextTick()
     passwordInput.value?.focus()
@@ -369,489 +302,318 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ====== 页面容器 ====== */
-.login-page {
+.auth-page {
+  --cosmo-ink: #21152d;
+  --cosmo-muted: #786d82;
+  --cosmo-card: rgba(255, 252, 250, 0.92);
+  --cosmo-line: rgba(62, 32, 78, 0.12);
+  --cosmo-pink: #f38bc1;
+  --cosmo-purple: #6f3187;
+  --cosmo-mint: #dfffc6;
   position: relative;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  /* 默认深色背景（向后兼容无 JS 情况） */
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  padding: 44px;
+  background: #f7f0f6;
+  color: var(--cosmo-ink);
+  isolation: isolate;
 }
 
-/* 浅色模式下页面背景 */
-[data-theme="light"] .login-page {
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 40%, #e2e8f0 100%);
-}
-[data-theme="light"] .bg-grid {
-  background-image:
-    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+[data-theme="dark"] .auth-page {
+  --cosmo-ink: #fff8fd;
+  --cosmo-muted: #b8aabd;
+  --cosmo-card: rgba(31, 20, 39, 0.9);
+  --cosmo-line: rgba(255, 255, 255, 0.1);
+  background: #160e1e;
 }
 
-/* ====== 主题切换按钮 ====== */
-.login-theme-toggle {
-  position: fixed;
-  top: 20px;
-  right: 24px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border-light, rgba(255,255,255,0.12));
-  border-radius: 12px;
-  background: var(--glass-bg, rgba(255,255,255,0.06));
-  color: var(--text-tertiary, #94a3b8);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-[data-theme="light"] .login-theme-toggle {
-  border-color: rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.75);
-}
-.login-theme-toggle:hover {
-  color: var(--text-primary, #f1f5f9);
-  border-color: var(--primary-300, rgba(79,110,247,0.4));
-  box-shadow: 0 0 0 3px var(--mail-unread-bg, rgba(79,110,247,0.12));
-  transform: rotate(15deg);
-}
-.login-theme-toggle svg {
-  transition: transform 0.25s ease;
-}
-
-/* 背景装饰 - 动态光球 */
-.bg-orb {
+.aurora {
   position: absolute;
+  z-index: -3;
+  width: 62vw;
+  height: 62vw;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.4;
-  animation: orb-float 12s ease-in-out infinite alternate;
+  filter: blur(10px);
+  opacity: 0.62;
 }
-.bg-orb-1 {
-  width: 500px; height: 500px;
-  top: -120px; right: -80px;
-  background: radial-gradient(circle, var(--primary-500, #4F6EF7) 0%, transparent 70%);
-  animation-delay: 0s;
+.aurora-pink {
+  top: -36vw;
+  right: -18vw;
+  background: radial-gradient(circle, rgba(243, 139, 193, 0.85), rgba(154, 91, 176, 0.12) 58%, transparent 72%);
 }
-.bg-orb-2 {
-  width: 400px; height: 400px;
-  bottom: -80px; left: -60px;
-  background: radial-gradient(circle, var(--info, #06B6D4) 0%, transparent 70%);
-  animation-delay: -4s;
+.aurora-mint {
+  bottom: -40vw;
+  left: -22vw;
+  background: radial-gradient(circle, rgba(223, 255, 198, 0.95), rgba(132, 200, 189, 0.1) 62%, transparent 74%);
 }
-.bg-orb-3 {
-  width: 300px; height: 300px;
-  top: 40%; left: 45%;
-  background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
-  opacity: 0.2;
-  animation-delay: -8s;
-}
-@keyframes orb-float {
-  0%   { transform: translate(0, 0) scale(1); }
-  33%  { transform: translate(30px, -20px) scale(1.05); }
-  66%  { transform: translate(-20px, 20px) scale(0.95); }
-  100% { transform: translate(10px, 10px) scale(1.02); }
-}
-
-/* 网格背景 */
-.bg-grid {
+.star-field {
   position: absolute;
+  z-index: -2;
   inset: 0;
+  opacity: 0.48;
   background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-  pointer-events: none;
+    radial-gradient(circle at 14% 21%, currentColor 0 1px, transparent 1.5px),
+    radial-gradient(circle at 72% 16%, currentColor 0 1px, transparent 1.5px),
+    radial-gradient(circle at 88% 76%, currentColor 0 1px, transparent 1.5px),
+    radial-gradient(circle at 32% 84%, currentColor 0 1px, transparent 1.5px);
+  background-size: 190px 190px, 270px 270px, 230px 230px, 310px 310px;
+  color: rgba(111, 49, 135, 0.25);
 }
 
-/* ====== 主容器 ====== */
-.login-container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  width: 900px;
-  max-width: 94vw;
-  min-height: 520px;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow:
-    0 32px 64px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-  animation: container-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-[data-theme="light"] .login-container {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow:
-    0 32px 64px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(0, 0, 0, 0.04) inset;
-}
-
-@keyframes container-in {
-  from { opacity: 0; transform: translateY(30px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ====== 左侧品牌区 ====== */
-.login-brand {
-  flex: 1;
-  padding: 52px 44px;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(160deg, var(--primary-500, #4F6EF7) 0%, var(--primary-600, #6366F1) 60%, #8B5CF6 100%);
-  position: relative;
-  overflow: hidden;
-}
-.login-brand::before {
-  content: '';
-  position: absolute;
-  top: -50%; right: -40%;
-  width: 400px; height: 400px;
-  background: rgba(255,255,255,0.08);
+.theme-toggle {
+  position: fixed;
+  z-index: 10;
+  top: 22px;
+  right: 24px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cosmo-line);
   border-radius: 50%;
-  filter: blur(40px);
-}
-.login-brand::after {
-  content: '';
-  position: absolute;
-  bottom: -30%; left: -20%;
-  width: 300px; height: 300px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 50%;
-  filter: blur(30px);
-}
-
-.brand-content {
-  position: relative;
-  z-index: 1;
-  color: #fff;
-}
-
-.brand-icon {
-  margin-bottom: 28px;
-  opacity: 0.92;
-  animation: icon-bounce 2s ease-in-out infinite;
-}
-@keyframes icon-bounce {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-6px); }
-}
-
-.brand-title {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: -1px;
-  margin-bottom: 12px;
-  line-height: 1.2;
-}
-
-.brand-desc {
-  font-size: 15px;
-  opacity: 0.82;
-  line-height: 1.6;
-  margin-bottom: 36px;
-}
-
-.brand-features {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  opacity: 0.88;
-}
-.feature-item svg {
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-/* ====== 右侧表单区 ====== */
-.login-form-area {
-  flex: 1.1;
-  padding: 48px 44px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: rgba(15, 23, 42, 0.6);
-}
-[data-theme="light"] .login-form-area {
-  background: rgba(255, 255, 255, 0.55);
-}
-
-.form-panel {
-  width: 100%;
-}
-
-.form-header {
-  margin-bottom: 32px;
-}
-.form-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text-primary, #f1f5f9);
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
-}
-.form-subtitle {
-  font-size: 14px;
-  color: var(--text-secondary, #94a3b8);
-}
-
-/* ====== 表单字段 ====== */
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.field-group {
-  position: relative;
-}
-.field-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-tertiary, #94a3b8);
-  margin-bottom: 8px;
-  transition: color 0.2s;
-}
-.field-group.focused .field-label {
-  color: var(--primary-500, #4F6EF7);
-}
-.field-group.error .field-label {
-  color: var(--error, #ef4444);
-}
-
-.field-group input {
-  width: 100%;
-  padding: 12px 14px;
-  padding-right: 44px;
-  font-size: 15px;
-  font-family: inherit;
-  color: var(--text-primary, #e2e8f0);
-  background: var(--input-bg, rgba(255, 255, 255, 0.06));
-  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
-  border-radius: 12px;
-  outline: none;
-  box-sizing: border-box;
-  transition: all 0.25s ease;
-}
-[data-theme="light"] .field-group input {
-  color: var(--text-primary, #1E293B);
-}
-.field-group input::placeholder {
-  color: var(--text-tertiary, #475569);
-}
-.field-group input:focus {
-  background: rgba(79, 110, 247, 0.06);
-  border-color: var(--primary-500, #4F6EF7);
-  box-shadow: 0 0 0 3px var(--mail-unread-bg, rgba(79, 110, 247, 0.15));
-}
-.field-group.error input {
-  border-color: var(--error, #ef4444);
-  background: var(--error-light, rgba(239, 68, 68, 0.04));
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.pwd-toggle {
-  position: absolute;
-  right: 10px;
-  top: 38px;
-  background: none;
-  border: none;
-  color: var(--text-tertiary, #475569);
+  background: var(--cosmo-card);
+  color: var(--cosmo-purple);
+  box-shadow: 0 10px 30px rgba(70, 32, 86, 0.08);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 6px;
-  transition: color 0.2s;
-  display: flex;
+  backdrop-filter: blur(18px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.pwd-toggle:hover { color: var(--text-secondary, #94a3b8); }
+.theme-toggle:hover { transform: translateY(-2px) rotate(8deg); box-shadow: 0 14px 34px rgba(70, 32, 86, 0.14); }
+.theme-toggle svg { width: 20px; height: 20px; }
 
-.field-error {
-  display: block;
+.auth-layout {
+  width: min(1080px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(380px, 0.8fr);
+  align-items: center;
+  gap: clamp(48px, 8vw, 118px);
+}
+
+.brand-scene { padding: 20px 0 20px 18px; }
+.brand-lockup { max-width: 570px; }
+.logo-orbit {
+  position: relative;
+  width: 142px;
+  height: 142px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 26px;
+}
+.brand-logo {
+  position: relative;
+  z-index: 2;
+  width: 104px;
+  height: 104px;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 22px rgba(70, 32, 86, 0.2));
+  animation: logo-float 5s ease-in-out infinite;
+}
+.orbit {
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(111, 49, 135, 0.28);
+  border-radius: 50%;
+  transform: rotate(-18deg) scaleY(0.5);
+}
+.orbit-two { inset: -9px; transform: rotate(28deg) scaleY(0.62); opacity: 0.45; }
+.satellite {
+  position: absolute;
+  z-index: 3;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cosmo-purple);
+  box-shadow: 0 0 0 5px rgba(111, 49, 135, 0.1);
+}
+.satellite-one { top: 27px; right: 12px; }
+.satellite-two { bottom: 18px; left: 18px; background: var(--cosmo-pink); }
+@keyframes logo-float { 50% { transform: translateY(-7px) rotate(2deg); } }
+
+.brand-kicker,
+.form-eyebrow {
+  margin: 0 0 12px;
+  color: var(--cosmo-purple);
   font-size: 12px;
-  color: var(--error, #ef4444);
-  margin-top: 4px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
 }
-
-.form-error-bar {
-  display: flex;
+.brand-scene h1 {
+  margin: 0;
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: 1.08;
+  letter-spacing: -0.055em;
+  font-weight: 850;
+}
+.brand-copy {
+  max-width: 510px;
+  margin: 24px 0 28px;
+  color: var(--cosmo-muted);
+  font-size: 16px;
+  line-height: 1.85;
+}
+.feature-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.feature-row span {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
-  background: var(--error-light, rgba(239, 68, 68, 0.08));
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 10px;
-  color: var(--error, #fca5a5);
-  font-size: 13px;
-  animation: shake 0.4s ease;
+  padding: 8px 12px;
+  border: 1px solid var(--cosmo-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  color: var(--cosmo-muted);
+  font-size: 12px;
+  font-weight: 650;
 }
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-6px); }
-  75% { transform: translateX(6px); }
-}
+[data-theme="dark"] .feature-row span { background: rgba(255, 255, 255, 0.04); }
+.feature-row i { width: 6px; height: 6px; border-radius: 50%; background: var(--cosmo-pink); }
+.feature-row span:nth-child(2) i { background: #86c7bc; }
+.feature-row span:nth-child(3) i { background: var(--cosmo-purple); }
 
-/* ====== 提交按钮 ====== */
-.btn-submit {
-  width: 100%;
-  padding: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  font-family: inherit;
-  color: #fff;
-  background: linear-gradient(135deg, var(--primary-500, #4F6EF7), var(--primary-600, #6366F1));
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  letter-spacing: 2px;
+.auth-card {
   position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(79, 110, 247, 0.35);
+  padding: 42px;
+  border: 1px solid var(--cosmo-line);
+  border-radius: 30px;
+  background: var(--cosmo-card);
+  box-shadow: 0 32px 90px rgba(67, 35, 77, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px);
+  transition: min-height 0.25s ease;
 }
-.btn-submit::before {
+.auth-card::before {
   content: '';
   position: absolute;
-  top: 0; left: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transition: left 0.5s ease;
+  inset: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 22px;
+  pointer-events: none;
 }
-.btn-submit:hover:not(:disabled)::before {
-  left: 100%;
+.mobile-brand { display: none; }
+.form-panel { position: relative; z-index: 1; }
+.form-header { margin-bottom: 30px; }
+.form-header h2 { margin: 0 0 9px; font-size: 28px; letter-spacing: -0.035em; }
+.form-header > p:last-child { margin: 0; color: var(--cosmo-muted); font-size: 13px; line-height: 1.6; }
+.form-eyebrow { margin-bottom: 10px; font-size: 10px; }
+.auth-form { display: grid; gap: 19px; }
+.field { display: grid; gap: 8px; }
+.field-caption { color: var(--cosmo-muted); font-size: 12px; font-weight: 700; }
+.input-wrap {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 15px;
+  border: 1px solid var(--cosmo-line);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.48);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-.btn-submit:hover:not(:disabled) {
+[data-theme="dark"] .input-wrap { background: rgba(255, 255, 255, 0.035); }
+.field.focused .input-wrap {
+  border-color: rgba(111, 49, 135, 0.58);
+  box-shadow: 0 0 0 4px rgba(243, 139, 193, 0.13);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(79, 110, 247, 0.45);
 }
-.btn-submit:active:not(:disabled) {
-  transform: translateY(0);
+.field.invalid .input-wrap { border-color: #dc5d78; box-shadow: 0 0 0 4px rgba(220, 93, 120, 0.1); }
+.input-wrap > svg { flex: 0 0 auto; width: 19px; height: 19px; color: var(--cosmo-purple); }
+.input-wrap input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--cosmo-ink);
+  font: inherit;
+  font-size: 14px;
 }
-.btn-submit:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.input-wrap input::placeholder { color: color-mix(in srgb, var(--cosmo-muted) 68%, transparent); }
+.reveal-button {
+  border: 0;
+  padding: 5px;
+  background: transparent;
+  color: var(--cosmo-muted);
+  font-size: 11px;
+  cursor: pointer;
 }
-.btn-register {
-  background: linear-gradient(135deg, var(--info, #06B6D4), #0891B2);
-  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.35);
+.field small { color: #d54567; font-size: 11px; }
+.error-message {
+  padding: 11px 13px;
+  border: 1px solid rgba(213, 69, 103, 0.2);
+  border-radius: 12px;
+  background: rgba(213, 69, 103, 0.08);
+  color: #d54567;
+  font-size: 12px;
 }
-.btn-register:hover:not(:disabled) {
-  box-shadow: 0 6px 24px rgba(6, 182, 212, 0.45);
+.submit-button {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 15px;
+  background: linear-gradient(120deg, #6f3187, #a9569b 55%, #ed83b9);
+  color: #fff;
+  box-shadow: 0 15px 30px rgba(111, 49, 135, 0.25);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.btn-spinner {
-  display: inline-block;
-  width: 18px; height: 18px;
-  border: 2px solid rgba(255,255,255,0.3);
+.submit-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 19px 34px rgba(111, 49, 135, 0.31); }
+.submit-button:disabled { opacity: 0.62; cursor: wait; }
+.submit-button svg { width: 18px; height: 18px; }
+.mode-button {
+  border: 0;
+  padding: 2px;
+  background: transparent;
+  color: var(--cosmo-purple);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  vertical-align: middle;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.panel-fade-enter-active, .panel-fade-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.panel-fade-enter-from { opacity: 0; transform: translateY(10px); }
+.panel-fade-leave-to { opacity: 0; transform: translateY(-8px); }
 
-.btn-switch-mode {
-  background: none;
-  border: none;
-  color: var(--text-tertiary, #64748b);
-  font-family: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  text-align: center;
-  padding: 4px 0;
-  transition: color 0.2s;
-}
-.btn-switch-mode:hover { color: var(--text-secondary, #94a3b8); }
-
-/* ====== 底部 ====== */
-.login-footer {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-tertiary, #334155);
-  margin-top: 28px;
-}
-.divider { margin: 0 6px; }
-
-/* ====== 表单切换动画 ====== */
-.form-slide-enter-active {
-  animation: slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.form-slide-leave-active {
-  animation: slide-out 0.25s cubic-bezier(0.7, 0, 0.84, 0);
-}
-@keyframes slide-in {
-  from { opacity: 0; transform: translateX(24px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes slide-out {
-  from { opacity: 1; transform: translateX(0); }
-  to   { opacity: 0; transform: translateX(-24px); }
-}
-
-/* ====== 响应式适配 ====== */
-@media (max-width: 768px) {
-  .login-container {
-    flex-direction: column;
-    width: calc(100vw - 16px);
-    max-width: 420px;
-    min-height: auto;
+@media (max-width: 860px) {
+  .auth-page { padding: 70px 22px 32px; overflow: auto; }
+  .auth-layout { width: min(460px, 100%); grid-template-columns: 1fr; gap: 22px; }
+  .brand-scene { display: none; }
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+    color: var(--cosmo-ink);
+    font-size: 17px;
+    font-weight: 800;
   }
-  .login-brand {
-    padding: 32px 28px;
-  }
-  .brand-title { font-size: 28px; }
-  .brand-desc { font-size: 13px; margin-bottom: 24px; }
-  .brand-features { gap: 10px; }
-  .feature-item { font-size: 13px; }
-  .feature-item svg { width: 16px; height: 16px; }
-
-  .login-form-area {
-    padding: 32px 28px 28px;
-  }
-  .form-title { font-size: 22px; }
-  .form-header { margin-bottom: 24px; }
-  .auth-form { gap: 16px; }
-
-  /* 移动端隐藏品牌特性列表 */
-  .brand-features { display: none; }
-  .brand-icon { margin-bottom: 18px; }
-
-  .bg-orb { opacity: 0.25; }
-
-  .login-theme-toggle {
-    top: 12px;
-    right: 12px;
-    width: 36px;
-    height: 36px;
-  }
+  .mobile-brand img { width: 46px; height: 46px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(70, 32, 86, 0.15)); }
 }
 
 @media (max-width: 480px) {
-  .login-container {
-    border-radius: 18px;
-  }
-  .login-brand { padding: 28px 24px; }
-  .login-form-area { padding: 28px 24px 24px; }
-  .brand-title { font-size: 24px; }
-  .form-title { font-size: 20px; }
+  .auth-page { padding: 66px 12px 18px; }
+  .auth-card { padding: 30px 24px; border-radius: 24px; }
+  .auth-card::before { border-radius: 17px; }
+  .form-header h2 { font-size: 24px; }
+  .theme-toggle { top: 14px; right: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo, .spinner { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
 </style>

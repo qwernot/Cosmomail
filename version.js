@@ -23,14 +23,14 @@ const ROOT = __dirname
 
 // ============ 配置 ============
 const PACKAGE_JSON_PATH = join(ROOT, 'web', 'package.json')
-const VERSION_JSON_PATH = join(ROOT, 'version.json')        // 发布到 EdgeOne Pages 的版本文件
+const VERSION_JSON_PATH = join(ROOT, 'version.json')
 const CHANGELOG_PATH = join(ROOT, 'docs', 'guide', 'changelog.md')
 
 // 项目地址配置
 const PROJECT_CONFIG = {
   githubUrl: 'https://github.com/qwernot/Cosmomail',
-  homepageUrl: 'https://160621.xyz/cosmomail',
-  versionApiUrl: 'https://api.160621.xyz/v1/version/cosmomail',
+  homepageUrl: 'https://github.com/qwernot/Cosmomail',
+  versionApiUrl: 'https://raw.githubusercontent.com/qwernot/Cosmomail/main/version.json',
 }
 
 // ============ 工具函数 ============
@@ -92,7 +92,7 @@ function writePackageJson(data) {
   console.log(`✅ 已更新 package.json → ${data.version}`)
 }
 
-/** 读取或初始化 version.json（EdgeOne Pages 版本检查用） */
+/** 读取或初始化 version.json（GitHub 托管的版本检查文件） */
 function readVersionJson() {
   if (existsSync(VERSION_JSON_PATH)) {
     return JSON.parse(readFileSync(VERSION_JSON_PATH, 'utf-8'))
@@ -281,13 +281,8 @@ function main() {
   if (!vJson.versionApiUrl) {
     vJson.versionApiUrl = PROJECT_CONFIG.versionApiUrl
   }
-  if (!vJson.downloadUrl && detected.downloadUrl) {
-    vJson.downloadUrl = detected.downloadUrl.replace('{version}', newVersionTag)
-  }
-  // 替换 downloadUrl 中的占位符
-  if (vJson.downloadUrl && vJson.downloadUrl.includes('{version}')) {
-    vJson.downloadUrl = vJson.downloadUrl.replace('{version}', newVersionTag)
-  }
+  // 每次发版都将下载地址指向当前仓库的当前标签，避免沿用旧版本链接
+  vJson.downloadUrl = `${vJson.githubUrl}/releases/tag/${newVersionTag}`
 
   writeVersionJson(vJson)
 
@@ -304,7 +299,7 @@ function main() {
   console.log(`  1. git add -A && git commit -m "release: ${newVersionTag}${changelogMessage ? ' - ' + changelogMessage : ''}"`)
   console.log(`  2. git tag ${newVersionTag}`)
   console.log(`  3. git push && git push --tags`)
-  console.log(`  4. 将 version.json 部署到 EdgeOne Pages`)
+  console.log(`  4. 推送 version.json 到 GitHub`)
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
   console.log('')
 }

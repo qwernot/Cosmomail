@@ -44,7 +44,7 @@ Body 模板中可以使用以下变量：
 每收到一封新邮件，会独立触发一次 Webhook 推送。模板中可直接使用扁平化的单封邮件字段。
 :::
 
-### 示例：[魔法推送](https://github.com/magiccode1412/magicpush)
+### 示例：通用 Webhook 接收端
 
 ```json
 {

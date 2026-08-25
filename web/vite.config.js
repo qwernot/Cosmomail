@@ -10,7 +10,10 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'))
 export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version || '0.0.0'),
-    __UPDATE_CHECK_URL__: JSON.stringify(process.env.UPDATE_CHECK_URL || ''),
+    __UPDATE_CHECK_URL__: JSON.stringify(
+      process.env.UPDATE_CHECK_URL
+      || 'https://raw.githubusercontent.com/qwernot/Cosmomail/main/version.json'
+    ),
   },
   plugins: [
     vue(),

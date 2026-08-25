@@ -235,7 +235,6 @@ is_macos() { [[ "$(uname -s)" == Darwin* ]]; }
 # 格式: "前缀" - 将 GitHub URL 前面加上此前缀即可使用镜像
 MIRROR_PREFIXES=(
     ""                                          # 原始地址（优先直连）
-    "https://magiccode.dpdns.org/"             # magiccode（优先使用）
     "https://gh-proxy.com/"                    # gh-proxy 镜像
     "https://ghfast.top/"                      # ghfast 镜像
 )
@@ -548,7 +547,6 @@ download_file() {
         # 提取镜像名称用于日志显示
         local mirror_name="${mirror_url%%://*}"
         case "${mirror_name}" in
-            *magiccode.dpdns.org*)  mirror_name="magiccode" ;;
             *gh-proxy.com*)         mirror_name="gh-proxy 镜像" ;;
             *ghfast.top*)           mirror_name="ghfast 镜像" ;;
             *.jsdelivr.net*)        mirror_name="jsDelivr CDN" ;;

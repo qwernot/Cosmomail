@@ -1,7 +1,7 @@
 /**
  * 版本更新检测 composable
  *
- * 通过请求 EdgeOne Pages 托管的 version.json 检测是否有新版本。
+ * 通过项目自己的 GitHub 仓库 version.json 检测是否有新版本。
  * 支持本地缓存（默认 1 小时），避免频繁请求。
  *
  * 用法:

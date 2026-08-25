@@ -218,7 +218,7 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <a href="https://www.160621.xyz/cosmomail/guide/webhooks.html" target="_blank" rel="noopener" class="doc-link">
+                <a href="https://github.com/qwernot/Cosmomail/blob/main/docs/guide/webhooks.md" target="_blank" rel="noopener" class="doc-link">
                   📖 参考文档
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display: inline-block; vertical-align: middle;">
                     <path d="M9 3L4.5 7.5M4.5 7.5L9 12M4.5 7.5H1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>

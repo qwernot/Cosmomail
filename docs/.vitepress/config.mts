@@ -47,7 +47,7 @@ export default defineConfig({
           { text: '开发指南', link: '/dev/overview' },
           { text: '配置参考', link: '/config/environment' },
           { text: 'GitHub', link: 'https://github.com/qwernot/Cosmomail' },
-          { text: '官网', link: 'https://160621.xyz/cosmomail' },
+          { text: '项目主页', link: 'https://github.com/qwernot/Cosmomail' },
         ],
       },
     ],
