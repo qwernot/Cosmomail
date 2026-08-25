@@ -81,7 +81,6 @@ export default defineConfig({
           text: '版本信息',
           items: [
             { text: '更新日志', link: '/guide/changelog' },
-            { text: '已知问题', link: '/guide/known-issues' },
           ],
         },
       ],
