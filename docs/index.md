@@ -25,7 +25,7 @@ features:
     details: 通过 IMAP 协议代理收取多个邮箱账号的邮件，支持 TLS 连接、全量/增量同步，自动去重存储到本地数据库。
   - icon: ⚡
     title: 实时推送
-    details: 后台默认每 5 秒执行 UID 增量同步，新邮件到达后推送到 PWA 客户端和 Webhook 外部服务。
+    details: 后台常驻 IMAP IDLE 监听，新邮件到达即时推送到 PWA 客户端和 Webhook 外部服务。
   - icon: 📱
     title: PWA 客户端
     details: 现代化渐进式 Web 应用，支持安装到桌面/主屏幕、深色模式、完全响应式布局。

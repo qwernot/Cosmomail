@@ -44,7 +44,7 @@ export COSMOMAIL_CORS_ORIGINS="*"
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
 | `COSMOMAIL_POLL_INTERVAL` | `300`（5 分钟）| IMAP 定时轮询间隔（秒），最低 10 秒 |
-| `COSMOMAIL_IDLE_ENABLED` | `false` | 可选启用 IMAP IDLE；默认关闭并对所有邮箱执行 5 秒增量轮询 |
+| `COSMOMAIL_IDLE_ENABLED` | `true` | 启用 IMAP IDLE 实时推送（设为 `false` 或 `0` 关闭）|
 | `COSMOMAIL_MAX_CONCURRENT` | `10` | IMAP 最大并发连接数 |
 | `COSMOMAIL_SYNC_BATCH_SIZE` | `50` | 每次同步拉取邮件数量上限 |
 

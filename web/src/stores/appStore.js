@@ -9,10 +9,10 @@ const DEFAULT_PRIMARY = '#4F6EF7'
 
 // 轮询间隔选项（用于设置页面）
 export const POLL_INTERVAL_OPTIONS = [
-  { value: 5000,   label: '5 秒（最快）' },
-  { value: 10000,  label: '10 秒' },
   { value: 30000,  label: '30 秒' },
   { value: 60000,  label: '1 分钟' },
+  { value: 120000, label: '2 分钟' },
+  { value: 300000, label: '5 分钟' },
 ]
 
 // 每页显示数量选项（用于设置页面）
@@ -283,7 +283,7 @@ export const useAppStore = defineStore('app', () => {
   const mailPageSize = ref(20)         // 每页显示邮件数量
 
   // --- 数据同步设置 ---
-  const pollInterval = ref(5000)       // 页面刷新兜底间隔（毫秒），默认 5 秒
+  const pollInterval = ref(60000)      // 页面刷新兜底间隔（毫秒），默认 60 秒
   const connectionMode = ref('unknown') // 'sse' | 'polling' | 'unknown'
   const lastRefreshAt = ref(0)          // 上次刷新时间戳（毫秒）
 
@@ -333,7 +333,7 @@ export const useAppStore = defineStore('app', () => {
     const savedPollInterval = localStorage.getItem('poll-interval')
     if (savedPollInterval) {
       const parsed = parseInt(savedPollInterval, 10)
-      if (!isNaN(parsed) && parsed >= 5000) pollInterval.value = parsed
+      if (!isNaN(parsed) && parsed >= 10000) pollInterval.value = parsed
     }
 
     applyTheme()

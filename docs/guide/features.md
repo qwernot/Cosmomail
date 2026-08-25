@@ -9,9 +9,9 @@
 - 基于 Message-ID 全局去重
 
 ### 实时监听
-- 后台常驻协程默认每 5 秒执行 UID 增量同步，也可选启用 [IMAP IDLE](https://tools.ietf.org/html/rfc2177)
+- 后台常驻协程运行 [IMAP IDLE](https://tools.ietf.org/html/rfc2177) 推送
 - 新邮件到达即时通知 PWA 客户端
-- 所有 IMAP、POP3 邮箱默认统一使用快速定时轮询
+- 不支持 IDLE 的服务器自动降级为定时轮询
 
 ### 多邮箱管理
 - 支持添加任意数量的 IMAP 邮箱账号

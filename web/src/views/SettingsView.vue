@@ -447,7 +447,7 @@ function calcCountdown() {
   const last = appStore.lastRefreshAt
   if (!last) { nextRefreshCountdown.value = '--'; return }
 
-  const interval = appStore.pollInterval || 5000
+  const interval = appStore.pollInterval || 60000
   const elapsed = Date.now() - last
   const remain = Math.max(0, Math.ceil((interval - elapsed) / 1000))
 

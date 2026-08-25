@@ -537,7 +537,7 @@ onMounted(async () => {
   // 获取统计信息（用于标签计数）
   mailStore.fetchStats()
 
-  // 即使 SSE 正常也保留短周期刷新，避免邮箱服务器漏发 IDLE 事件。
+  // 启动定时刷新作为 SSE 的备用机制。
   startRefreshTimer()
 
   document.addEventListener('click', handleDocumentClick)
@@ -568,8 +568,8 @@ onUnmounted(() => {
 
 function startRefreshTimer() {
   stopRefreshTimer()
-  // 使用用户配置的轮询间隔（默认 5 秒）
-  const interval = appStore.pollInterval || 5000
+  // 使用用户配置的轮询间隔（默认 60 秒）
+  const interval = appStore.pollInterval || 60000
   console.log(`[MailList] 启动定时刷新，间隔: ${interval / 1000} 秒`)
   refreshTimer = setInterval(() => {
     console.log('🔄 [MailList] 定时刷新触发 (备用机制)')

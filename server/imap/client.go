@@ -260,8 +260,10 @@ func (c *IMAPClient) SelectMailbox(name string) (*imap.SelectData, error) {
 // Close 关闭连接
 func (c *IMAPClient) Close() {
 	if c.Client != nil {
-		if err := c.Client.Logout().Wait(); err != nil {
-			log.Printf("⚠️  IMAP 连接关闭异常 (%s): %v", c.Account.Email, err)
+		// 后台轮询不等待服务器响应 LOGOUT。部分邮箱会接受命令却不返回结果，
+		// 导致整个账号 Worker 永久卡住；立即关闭 TCP 连接可可靠释放会话。
+		if err := c.Client.Close(); err != nil {
+			log.Printf("⚠️  IMAP 连接释放异常 (%s): %v", c.Account.Email, err)
 		}
 	}
 }
