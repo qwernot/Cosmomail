@@ -27,7 +27,7 @@ jobs:
           version: 10.34.1
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
           cache-dependency-path: docs/pnpm-lock.yaml
       - run: pnpm --dir docs install --frozen-lockfile
@@ -35,6 +35,8 @@ jobs:
         env:
           VITEPRESS_BASE: /Cosmomail/
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist
