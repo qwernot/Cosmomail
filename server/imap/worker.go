@@ -56,7 +56,13 @@ var idleVerifiedServers = map[string]bool{
 	"imap.gmail.com":        true, // Gmail - RFC2177 标准实现
 	"imap.mail.yahoo.com":   true, // Yahoo Mail - 支持IDLE
 	"outlook.office365.com": true, // Outlook/Exchange Online - 支持IDLE
-	"imap.qq.com":           true, // QQ邮箱 - 支持IDLE (需确认)
+}
+
+// pollingOnlyServers 接受 IDLE 命令但实测可能不发送 EXISTS 通知的服务器。
+// 对这些服务器直接使用短周期增量轮询，避免邮件一直等到手动同步才出现。
+var pollingOnlyServers = map[string]bool{
+	"imap.qq.com":        true,
+	"imap.exmail.qq.com": true,
 }
 
 // idleLearnedUnsupported 运行时学习到的、已确认不支持IDLE的服务器（全局共享）
@@ -181,10 +187,16 @@ func NewAccountWorker(account *models.MailAccount, db *gorm.DB, cfg *config.Conf
 		stopCh:     make(chan struct{}),
 		syncCh:     make(chan struct{}, 1),
 	}
+	host := strings.ToLower(strings.TrimSpace(account.ImapHost))
+	if pollingOnlyServers[host] {
+		w.idleUnsupported = true
+		log.Printf("⚡ %s (%s) 使用 %d 秒快速增量轮询", account.Email, account.ImapHost, cfg.IMAP.PollInterval)
+		return w
+	}
 
 	// 策略：默认尝试IDLE，除非已知该服务器不支持（通过运行时学习）
 	// 不在白名单的服务器也会首次尝试IDLE，失败后自动标记为不支持
-	if !idleVerifiedServers[account.ImapHost] {
+	if !idleVerifiedServers[host] {
 		log.Printf("ℹ️  %s (%s) 未在IDLE支持列表中，将首次尝试IDLE（失败后将自动禁用）",
 			account.Email, account.ImapHost)
 	}
@@ -531,11 +543,9 @@ func (w *AccountWorker) idleLoop() error {
 }
 
 func (w *AccountWorker) idleRefreshInterval() time.Duration {
-	interval := time.Duration(w.config.IMAP.PollInterval) * time.Second
-	if interval <= 0 || interval > 25*time.Minute {
-		return 25 * time.Minute
-	}
-	return interval
+	// 可靠 IDLE 服务器由推送驱动；每分钟做一次安全校验即可。
+	// 不能复用 5 秒轮询配置，否则会频繁退出 IDLE、重复登录。
+	return time.Minute
 }
 
 // newIMAPClientWithHandler 创建带有 UnilateralDataHandler 的 IMAP 客户端
