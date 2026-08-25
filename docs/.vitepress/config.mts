@@ -119,8 +119,7 @@ export default defineConfig({
     },
 
     footer: {
-      message: '基于 AGPLv3 协议开源',
-      copyright: 'Copyright © 2024-present Cosmo Mail Contributors',
+      copyright: 'Copyright © Cosmo Mail',
     },
 
     search: {
