@@ -10,10 +10,11 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
-	"cosmomail/config"
 	"cosmomail/buildinfo"
+	"cosmomail/config"
 	"cosmomail/models"
 	"cosmomail/oauth2"
 	pop3pkg "cosmomail/pop3"
@@ -233,6 +234,14 @@ func (c *IMAPClient) authenticateLogin() error {
 // sendClientID 发送 IMAP ID 命令声明客户端身份（RFC 2971）
 // 163/126等网易邮箱要求客户端必须发送ID命令，否则会返回 "SELECT Unsafe Login" 错误
 func (c *IMAPClient) sendClientID() {
+	// 网易邮箱会在未发送 ID 时拒绝 SELECT；其他主流服务并不要求它。
+	// 一些服务器（已在 QQ IMAP 上复现）会接受 ID 命令却永不返回响应，
+	// 而 go-imap 的 IDCommand.Wait 没有上下文参数，会永久卡住整个同步 Worker。
+	// 因此只对明确要求 ID 的服务器发送，避免把非必要能力变成单点阻塞。
+	if !requiresClientID(c.Account.ImapHost) {
+		return
+	}
+
 	idData := &imap.IDData{
 		Name:    "Cosmo Mail",
 		Version: buildinfo.Version,
@@ -241,6 +250,15 @@ func (c *IMAPClient) sendClientID() {
 	if _, err := c.Client.ID(idData).Wait(); err != nil {
 		// ID 命令失败不阻塞登录（部分服务器可能不支持），仅记录日志
 		log.Printf("⚠️  发送 IMAP ID 命令失败 (可能服务器不支持): %v", err)
+	}
+}
+
+func requiresClientID(host string) bool {
+	switch strings.ToLower(strings.TrimSpace(host)) {
+	case "imap.163.com", "imap.126.com", "imap.yeah.net":
+		return true
+	default:
+		return false
 	}
 }
 
