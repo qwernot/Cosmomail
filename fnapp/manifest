@@ -1,5 +1,5 @@
 appname=com.qwernot.cosmomail
-version=1.1.8
+version=1.1.9
 display_name=Cosmo Mail
 desc=简洁、安全的多邮箱统一管理工具，支持 IMAP、POP3、SMTP、实时收信和 Webhook 通知。
 arch=x86_64
