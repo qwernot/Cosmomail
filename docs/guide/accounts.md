@@ -10,8 +10,10 @@
 | 邮箱地址 | 完整邮箱地址 | user@qq.com |
 | IMAP 主机 | 邮件服务器地址 | imap.qq.com |
 | IMAP 端口 | 通常为 993 (TLS) 或 143 (STARTTLS) | 993 |
+| SMTP 主机 | 发件服务器地址 | smtp.qq.com |
+| SMTP 端口 | 通常为 465 (SSL/TLS) 或 587 (STARTTLS) | 465 |
 | 用户名 | IMAP 登录名（通常同邮箱地址） | user@qq.com |
-| 密码 | IMAP 密码或授权码 | ******** |
+| 密码 | 收发邮件使用的密码或授权码 | ******** |
 
 ::: warning QQ / 163 等国内邮箱
 大部分现代邮箱服务商需要使用「授权码」而非登录密码。请在对应服务商的账户设置中开启 IMAP 服务并生成授权码。
@@ -19,19 +21,32 @@
 
 ## 常见邮箱服务器配置
 
+### 收件配置（IMAP）
+
 | 服务商 | IMAP 主机 | 端口 | 加密方式 |
 |--------|-----------|------|----------|
 | QQ 邮箱 | imap.qq.com | 993 | SSL/TLS |
 | 163 邮箱 | imap.163.com | 993 | SSL/TLS |
 | Outlook | outlook.office365.com | 993 | SSL/TLS |
+| Gmail | imap.gmail.com | 993 | SSL/TLS |
+| Yahoo | imap.mail.yahoo.com | 993 | SSL/TLS |
 
 ::: tip Outlook / Hotmail 用户注意
 微软已禁用传统密码方式的 IMAP 认证，推荐使用 **OAuth2 设备码流** 授权。
 详细配置步骤请查看 [Outlook OAuth2 配置指南](/guide/oauth2-microsoft)。
 :::
 
-| Gmail | imap.gmail.com | 993 | SSL/TLS |
-| Yahoo | imap.mail.yahoo.com | 993 | SSL/TLS |
+### 发件配置（SMTP）
+
+| 服务商 | SMTP 主机 | 端口 | 加密方式 |
+|--------|-----------|------|----------|
+| QQ 邮箱 | smtp.qq.com | 465 | SSL/TLS |
+| 163 邮箱 | smtp.163.com | 465 | SSL/TLS |
+| Outlook | smtp.office365.com | 587 | STARTTLS |
+| Gmail | smtp.gmail.com | 587 | STARTTLS |
+| Yahoo | smtp.mail.yahoo.com | 465 | SSL/TLS |
+
+SMTP 用户名通常为完整邮箱地址，密码与收件配置相同；QQ、163、Gmail 和 Yahoo 等邮箱通常需要填写服务商生成的授权码或应用专用密码。
 
 ## HTTP 代理
 
