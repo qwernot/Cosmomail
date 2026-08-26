@@ -11,6 +11,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"cosmomail/buildinfo"
@@ -32,9 +33,11 @@ type MailClient interface {
 
 // IMAPClient 封装 go-imap/v2 客户端连接，提供连接/认证/关闭等基础操作
 type IMAPClient struct {
-	Client  *imapclient.Client // 底层 IMAP 客户端
-	Account *models.MailAccount
-	config  *config.Config
+	Client    *imapclient.Client // 底层 IMAP 客户端
+	Account   *models.MailAccount
+	config    *config.Config
+	conn      net.Conn
+	closeOnce sync.Once
 }
 
 // NewIMAPClient 创建新的 IMAP 邮件连接实例
@@ -64,40 +67,62 @@ func NewIMAPClient(account *models.MailAccount, cfg *config.Config) (*IMAPClient
 		},
 	}
 
-	// 获取自定义 Dialer（代理）
-	customDialer, err := proxy.Dialer(account.ProxyEnabled, account.ProxyURL)
+	client, conn, err := dialIMAPTLS(account, addr, tlsConfig, &imapclient.Options{})
 	if err != nil {
-		return nil, fmt.Errorf("代理配置错误: %w", err)
-	}
-
-	var client *imapclient.Client
-	if customDialer != nil {
-		// 通过代理建立 TCP 连接，再包装 TLS
-		conn, err := customDialer("tcp", addr)
-		if err != nil {
-			return nil, fmt.Errorf("通过代理连接 %s 失败: %w", addr, err)
-		}
-		tlsConn := tls.Client(conn, tlsConfig)
-		if err := tlsConn.Handshake(); err != nil {
-			conn.Close()
-			return nil, fmt.Errorf("TLS 握手失败 (%s): %w", addr, err)
-		}
-		client = imapclient.New(tlsConn, &imapclient.Options{})
-	} else {
-		// 直连
-		client, err = imapclient.DialTLS(addr, &imapclient.Options{
-			TLSConfig: tlsConfig,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("连接 %s 失败: %w", addr, err)
-		}
+		return nil, err
 	}
 
 	return &IMAPClient{
 		Client:  client,
 		Account: account,
 		config:  cfg,
+		conn:    conn,
 	}, nil
+}
+
+// dialIMAPTLS keeps the transport connection alongside go-imap's Client.
+// The library's Client.Close first acquires internal state locks; a malformed
+// or half-closed server session can leave that lock held forever. Keeping the
+// raw connection lets the worker break any blocked read/write independently.
+func dialIMAPTLS(account *models.MailAccount, addr string, tlsConfig *tls.Config, options *imapclient.Options) (*imapclient.Client, net.Conn, error) {
+	customDialer, err := proxy.Dialer(account.ProxyEnabled, account.ProxyURL)
+	if err != nil {
+		return nil, nil, fmt.Errorf("代理配置错误: %w", err)
+	}
+
+	var rawConn net.Conn
+	if customDialer != nil {
+		rawConn, err = customDialer("tcp", addr)
+		if err != nil {
+			return nil, nil, fmt.Errorf("通过代理连接 %s 失败: %w", addr, err)
+		}
+	} else {
+		dialer := net.Dialer{Timeout: 15 * time.Second, KeepAlive: 30 * time.Second}
+		rawConn, err = dialer.Dial("tcp", addr)
+		if err != nil {
+			return nil, nil, fmt.Errorf("连接 %s 失败: %w", addr, err)
+		}
+	}
+
+	tlsConfig = tlsConfig.Clone()
+	if tlsConfig.NextProtos == nil {
+		tlsConfig.NextProtos = []string{"imap"}
+	}
+	tlsConn := tls.Client(rawConn, tlsConfig)
+	if err := tlsConn.SetDeadline(time.Now().Add(20 * time.Second)); err != nil {
+		rawConn.Close()
+		return nil, nil, fmt.Errorf("设置 TLS 超时失败 (%s): %w", addr, err)
+	}
+	if err := tlsConn.Handshake(); err != nil {
+		rawConn.Close()
+		return nil, nil, fmt.Errorf("TLS 握手失败 (%s): %w", addr, err)
+	}
+	_ = tlsConn.SetDeadline(time.Time{})
+
+	if options == nil {
+		options = &imapclient.Options{}
+	}
+	return imapclient.New(tlsConn, options), tlsConn, nil
 }
 
 // NewMailClient 根据协议类型创建对应的邮件客户端（IMAP / POP3）
@@ -278,13 +303,26 @@ func (c *IMAPClient) SelectMailbox(name string) (*imap.SelectData, error) {
 
 // Close 关闭连接
 func (c *IMAPClient) Close() {
-	if c.Client != nil {
-		// 后台轮询不等待服务器响应 LOGOUT。部分邮箱会接受命令却不返回结果，
-		// 导致整个账号 Worker 永久卡住；立即关闭 TCP 连接可可靠释放会话。
-		if err := c.Client.Close(); err != nil {
-			log.Printf("⚠️  IMAP 连接释放异常 (%s): %v", c.Account.Email, err)
+	c.ForceClose()
+}
+
+// ForceClose bypasses go-imap's internal mutexes and closes the TLS transport
+// directly. It is safe to call from the watchdog while another command waits.
+func (c *IMAPClient) ForceClose() {
+	c.closeOnce.Do(func() {
+		if c.conn != nil {
+			if err := c.conn.Close(); err != nil && !strings.Contains(strings.ToLower(err.Error()), "closed") {
+				log.Printf("⚠️  IMAP 连接释放异常 (%s): %v", c.Account.Email, err)
+			}
 		}
+	})
+}
+
+func (c *IMAPClient) SetDeadline(deadline time.Time) error {
+	if c.conn == nil {
+		return nil
 	}
+	return c.conn.SetDeadline(deadline)
 }
 
 // DeleteMessage 通过 UID 删除服务器上的邮件（Store + \Deleted 标志 → Expunge/UID Expunge）

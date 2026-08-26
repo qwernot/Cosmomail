@@ -182,7 +182,12 @@ type AccountWorker struct {
 	syncCh          chan struct{} // 手动/外部触发，容量1用于合并重复请求
 	stopOnce        sync.Once
 	idleUnsupported bool // 标记该账号是否不支持IDLE（避免重复尝试）
+	activeMu        sync.Mutex
+	activeIMAP      *IMAPClient
+	activeSince     time.Time
 }
+
+const imapOperationTimeout = 2 * time.Minute
 
 // NewAccountWorker 创建新的账号 Worker
 func NewAccountWorker(account *models.MailAccount, db *gorm.DB, cfg *config.Config, sem chan struct{}, shutdownCh chan struct{}) *AccountWorker {
@@ -215,6 +220,9 @@ func NewAccountWorker(account *models.MailAccount, db *gorm.DB, cfg *config.Conf
 // Run 启动 Worker 主循环：先做一次全量同步，然后进入 IDLE（仅 IMAP）或轮询模式
 func (w *AccountWorker) Run() {
 	defer log.Printf("⏹️  Worker 退出: %s", w.account.Email)
+	watchdogDone := make(chan struct{})
+	defer close(watchdogDone)
+	go w.watchdogLoop(watchdogDone)
 
 	// 首次全量同步
 	w.syncOnce()
@@ -305,6 +313,15 @@ func (w *AccountWorker) syncOnce() {
 		w.updateAccountStatus("error", err.Error())
 		return
 	}
+	if imapClient, ok := client.(*IMAPClient); ok {
+		w.setActiveIMAP(imapClient)
+		defer w.clearActiveIMAP(imapClient)
+		if deadlineErr := imapClient.SetDeadline(time.Now().Add(imapOperationTimeout)); deadlineErr != nil {
+			client.Close()
+			w.updateAccountStatus("error", fmt.Sprintf("设置 IMAP 操作超时失败: %v", deadlineErr))
+			return
+		}
+	}
 	defer client.Close()
 
 	// 认证
@@ -361,6 +378,49 @@ func (w *AccountWorker) syncOnce() {
 	}
 	// Let active clients refresh status even when there were only Sent changes.
 	sse.PublishMailSynced(w.account.ID, w.account.Email)
+}
+
+func (w *AccountWorker) setActiveIMAP(client *IMAPClient) {
+	w.activeMu.Lock()
+	w.activeIMAP = client
+	w.activeSince = time.Now()
+	w.activeMu.Unlock()
+}
+
+func (w *AccountWorker) clearActiveIMAP(client *IMAPClient) {
+	w.activeMu.Lock()
+	if w.activeIMAP == client {
+		w.activeIMAP = nil
+		w.activeSince = time.Time{}
+	}
+	w.activeMu.Unlock()
+}
+
+// watchdogLoop is a second line of defence beyond socket deadlines. If a
+// library call wedges while holding an internal lock, closing the raw TLS
+// transport forces the command to unwind and lets the next poll reconnect.
+func (w *AccountWorker) watchdogLoop(done <-chan struct{}) {
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			w.activeMu.Lock()
+			client := w.activeIMAP
+			activeSince := w.activeSince
+			w.activeMu.Unlock()
+			if client != nil && !activeSince.IsZero() && time.Since(activeSince) > imapOperationTimeout+15*time.Second {
+				log.Printf("⏱️  IMAP 操作超时 (%s)，强制断开并重建连接", client.Account.Email)
+				client.ForceClose()
+			}
+		case <-done:
+			return
+		case <-w.stopCh:
+			return
+		case <-w.shutdownCh:
+			return
+		}
+	}
 }
 
 func (w *AccountWorker) notifyNewMails(count int, syncedIDs []uint) {
@@ -586,7 +646,7 @@ func (w *AccountWorker) newIMAPClientWithHandler(mailboxCh chan struct{}) (*IMAP
 	var err error
 
 	// 直连方式创建客户端（与 NewIMAPClient 保持一致）
-	imapClient, err = imapclient.DialTLS(addr, &imapclient.Options{
+	options := &imapclient.Options{
 		TLSConfig: tlsConfig,
 		UnilateralDataHandler: &imapclient.UnilateralDataHandler{
 			// ⭐ 关键: 监听 Mailbox 状态变化 (EXISTS/EXPUNGE 等)
@@ -611,7 +671,9 @@ func (w *AccountWorker) newIMAPClientWithHandler(mailboxCh chan struct{}) (*IMAP
 					w.account.Email, msg.SeqNum)
 			},
 		},
-	})
+	}
+	var conn net.Conn
+	imapClient, conn, err = dialIMAPTLS(w.account, addr, tlsConfig, options)
 
 	if err != nil {
 		return nil, fmt.Errorf("连接 %s 失败: %w", addr, err)
@@ -621,6 +683,7 @@ func (w *AccountWorker) newIMAPClientWithHandler(mailboxCh chan struct{}) (*IMAP
 		Client:  imapClient,
 		Account: w.account,
 		config:  w.config,
+		conn:    conn,
 	}, nil
 }
 

@@ -1,6 +1,14 @@
 package imap
 
-import "testing"
+import (
+	"net"
+	"testing"
+	"time"
+
+	"cosmomail/models"
+
+	"github.com/emersion/go-imap/v2/imapclient"
+)
 
 func TestRequiresClientID(t *testing.T) {
 	tests := []struct {
@@ -22,5 +30,29 @@ func TestRequiresClientID(t *testing.T) {
 				t.Fatalf("requiresClientID(%q) = %v, want %v", tt.host, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestIMAPClientCloseBypassesProtocolShutdown(t *testing.T) {
+	clientConn, serverConn := net.Pipe()
+	defer serverConn.Close()
+
+	client := &IMAPClient{
+		Client:  imapclient.New(clientConn, nil),
+		Account: &models.MailAccount{Email: "test@example.com"},
+		conn:    clientConn,
+	}
+
+	done := make(chan struct{})
+	go func() {
+		client.Close()
+		client.Close() // idempotent watchdog/application close race
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("IMAP transport close blocked")
 	}
 }
