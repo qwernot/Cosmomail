@@ -72,6 +72,7 @@ jobs:
     needs: build-binary
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: actions/download-artifact@v5
         with:
           path: artifacts
